@@ -1,11 +1,13 @@
 import fetch, { Response } from 'node-fetch';
 import { readFile } from 'fs';
+import { homedir } from 'os';
+import path from 'path';
 import { promisify }  from 'util';
 
 import emojiMap, { EmojiMap, FormatData } from './emojis';
 
 const readFilePromise = promisify(readFile)
-const CONFIG_PATH = './tw-config.json';
+const CONFIG_PATH = path.join(homedir(), '.tw-config.json');
 
 type WeatherQueryOptions = {
   units: 'standard' | 'metric' | 'imperial';
@@ -41,16 +43,33 @@ type Coordinates = {
 }
 
 async function readConfig() {
-  const json = await readFilePromise(CONFIG_PATH, 'utf-8');
-  return JSON.parse(json);
+  try {
+    const json = await readFilePromise(CONFIG_PATH, 'utf-8');
+    return JSON.parse(json);
+  } catch(e) {
+    console.error('Error: could not read your config file with your API KEY.')
+    // TODO: run a cli --help command here 
+    process.exit(1);
+  }
 }
 
 async function getLocationFromIpAddress():Promise<Coordinates> {
 
-  const result:Response = await fetch('http://ip-api.com/json');
-  const { lat, lon } = await result.json(); 
+    const result:Response = await fetch('http://ip-api.com/json');
+    const { lat, lon } = await result.json(); 
+    return { lat, lon }
 
-  return { lat, lon }
+}
+
+function buildSearchParamString(options: Coordinates & WeatherQueryOptions):string {
+
+  return Object.entries(options).reduce((qs: string, entry: [string, string]) => {
+
+    const [key, value] = entry;
+    const segment = `&${key}=${value}`;
+    return qs + segment;
+
+  }, '' as string);
 
 }
 
@@ -58,20 +77,8 @@ async function getWeatherFromCoords(coordinates: Coordinates, options: WeatherQu
 
   const { lat, lon } = coordinates;
 
-  const weatherSearchParams = new URLSearchParams();
-
-  weatherSearchParams.append('lat', lat.toString());
-  weatherSearchParams.append('lon', lon.toString());
-
-  if (options.exclude)
-    weatherSearchParams.append('exclude', options.exclude);
-
-  if (options.units)
-    weatherSearchParams.append('units', options.units);
-
-  weatherSearchParams.append('appid', options.appid);
-
-  const owmEndpoint = `https://api.openweathermap.org/data/2.5/onecall?${weatherSearchParams.toString()}`
+  const qp = buildSearchParamString({ ...coordinates, ...options });
+  const owmEndpoint = `https://api.openweathermap.org/data/2.5/onecall?${qp}`
   const response:Response = await fetch(owmEndpoint);
   const weather:WeatherResponse = await response.json();
 
