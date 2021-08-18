@@ -69,7 +69,7 @@ function buildSearchParamString(options: Coordinates & WeatherQueryOptions):stri
     const segment = `&${key}=${value}`;
     return qs + segment;
 
-  }, '' as string);
+  }, '');
 
 }
 
