@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "resolveJsonModule" : false,
+    "strictNullChecks": true,
+    "lib": [
+      "dom",
+      "es2015"
+    ],
+    "outDir": "build",
+    "allowJs": true,
+    "target": "es5"
+  },
+  "exclude": [
+    "node_modules",
+    "build"
+  ]
+}
