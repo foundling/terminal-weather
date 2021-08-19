@@ -74,7 +74,7 @@ async function readConfig() {
 async function getLocationFromIpAddress():Promise<Coordinates> {
 
     const result:Response = await fetch('http://ip-api.com/json');
-    console.log(result.status)
+    //console.log(result.status)
     const { lat, lon } = await result.json();
     return { lat, lon }
 
@@ -97,7 +97,7 @@ async function getWeatherFromCoords(queryParams: WeatherQueryOptions):Promise<We
   const qp = buildSearchParamString(queryParams);
   const owmEndpoint = `https://api.openweathermap.org/data/2.5/onecall?${qp}`
   const response:Response = await fetch(owmEndpoint);
-  console.log(response.status)
+  //console.log(response.status)
   const weather:WeatherResponse = await response.json();
 
   return weather
@@ -112,7 +112,7 @@ function formatWeatherData(data: DailyWeatherResponse) {
   const [ hi, lo ] = [ Math.round(max), Math.round(min) ];
   const { description, main } = data.weather[0];
   const weather = emojiMap[main].icon ? emojiMap[main].icon : emojiMap[main].text;
-  result += `${weather}  ${hi}/${lo} |`;
+  result += `${weather}`;
 
   return result;
 
@@ -121,7 +121,6 @@ function formatWeatherData(data: DailyWeatherResponse) {
 async function main() {
 
   const config = await readConfig();
-  console.log(config)
   const temp_unit = config.get('temp_unit');
   const API_KEY = config.get('API_KEY');
   const { lat, lon }:Coordinates = await getLocationFromIpAddress();
