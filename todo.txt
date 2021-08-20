@@ -1,0 +1,6 @@
+caching weather string, invalidating cache
+
+cli commands:
+  help
+  configure (write default config) 
+  format string (to config weather string via config) 
