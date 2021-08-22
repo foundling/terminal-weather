@@ -1,10 +1,10 @@
-export type FormatData = {
+export type Description = {
   text: string;
   icon?: string;
 };
 
 export type EmojiMap = {
-  [ k: string ]: FormatData
+  [ k: string ]: Description;
 };
 
 const emojiMap:EmojiMap = {

@@ -4,7 +4,7 @@ import { homedir } from 'os';
 import path from 'path';
 import { promisify }  from 'util';
 
-import emojiMap, { EmojiMap, FormatData } from './emojis';
+import emojiMap, { EmojiMap, Description } from './emojis';
 
 const readFilePromise = promisify(readFile)
 const CONFIG_PATH = path.join(homedir(), '.twconfig'); // TODO: make this a command-line flag
@@ -13,15 +13,15 @@ const CONFIG_PATH = path.join(homedir(), '.twconfig'); // TODO: make this a comm
 type UNIT_OPTION = 'imperial' | 'standard' | 'metric';
 type DISPLAY_OPTION = 'emoji' | 'text';
 type Config = {
-  [key: string]: undefined | string | number | UNIT_OPTION | DISPLAY_OPTION;
+  [key: string]: string | number | UNIT_OPTION | DISPLAY_OPTION;
   // resolves error: No index signature with a parameter of type 'string' was found on type 'Config'. 
-  APPID?: string;
-  UNITS?: UNIT_OPTION;
-  DISPLAY?: DISPLAY_OPTION;
-  DAYS?: number;
-  FORMAT?: string;
-  CACHED_AT?: number;
-  CACHED_WEATHER?: string;
+  APPID: string;
+  UNITS: UNIT_OPTION;
+  DISPLAY: DISPLAY_OPTION;
+  DAYS: string;
+  FORMAT: string;
+  CACHED_AT: string;
+  CACHED_WEATHER: string;
 };
 
 const DEFAULT_CONFIG:Config = {
@@ -29,9 +29,16 @@ const DEFAULT_CONFIG:Config = {
   UNITS: 'imperial',
   DISPLAY: 'emoji',
   FORMAT: 'd:i', 
+  DAYS: '1',
+  CACHED_AT: '',
+  CACHED_WEATHER:'',
   // notes on format: d = day, i = icon, t = text, T = TEXT. rest is literal
   // format is for each day, so if you have days = 4, then 'd:i' is repeated for each day
-  DAYS: 4,
+};
+
+type FormatData = {
+  units: string;
+  multiple: Boolean;
 };
 
 type WeatherQueryOptions = {
@@ -70,10 +77,20 @@ type WeatherResponse = {
 };
 
 function validateConfig(config: Config):void {
+
+  const appId = config['APPID'];
+  const days = parseInt(config['DAYS']) || 0;
+
   if (!config['APPID']) {
     console.error('Config File Missing value: APPID');
     process.exit(1);
   }
+
+  if (days < 1 || days > 8) {
+    console.error(`Config Error: 'DAYS' must be a number between 1 and 8, inclusive.`);
+    process.exit(1);
+  }
+
 }
 
 async function getConfig(configPath:string, defaultConfig:Config):Promise<Config> {
@@ -83,6 +100,9 @@ async function getConfig(configPath:string, defaultConfig:Config):Promise<Config
 
   const config:Config = lines.reduce((config:Config, line:string) => {
 
+    // if a config line has multiple '=', you should throw an config Parsing error.
+    // case: user uses '=' in their format string.
+    // make them escape it? and split the line on [^\]= ?
     const [name, value] = line.split('=').map(nameOrValue => nameOrValue.trim())
     config[name] = value;
 
@@ -127,19 +147,19 @@ async function getWeatherFromCoords(queryParams: WeatherQueryOptions):Promise<We
 
 }
 
-function formatWeatherData(data: DailyWeatherResponse) {
+const makeWeatherFormatter = (formatData:FormatData) => (weatherData: DailyWeatherResponse):string => {
 
-  let result = '';
 
-  const secondsSinceUnixEpoch = data.dt * 1000; 
+  const secondsSinceUnixEpoch = weatherData.dt * 1000; 
   const day = new Date(secondsSinceUnixEpoch).toLocaleDateString('en-US', { weekday: 'short' });
-  const { min, max } = data.temp;
+  const { min, max } = weatherData.temp;
   const [ hi, lo ] = [ Math.round(max), Math.round(min) ];
-  const { description, main } = data.weather[0];
+  const { description, main } = weatherData.weather[0];
   const weather = emojiMap[main].icon ? emojiMap[main].icon : emojiMap[main].text;
-  result += `${day.substr(0,2).toLowerCase()}${weather} `;
+  const howShort = ['S','T'].includes(day[0]) ? 2 : 1; 
+  const dayShort = day.substr(0,howShort); 
 
-  return result;
+  return formatData.multiple ? `${dayShort}: ${hi}/${lo} ${weather}  ` : `${hi}/${lo} ${weather}`;
 
 }
 
@@ -149,20 +169,32 @@ async function main() {
 
   validateConfig(config);
 
-  const { UNITS, APPID } = config;
+  const { UNITS, APPID, FORMAT, DAYS } = config;
   const { lat, lon }:Coordinates = await getLocationFromIpAddress();
+  const units = UNITS || 'imperial';
+  const days = parseInt(DAYS);
+  const unitMap:Map<string,string> = new Map([
+    ['standard', 'k'],
+    ['imperial', 'f'],
+    ['metric', 'celcius']
+  ]);
 
   const queryParams = {
-    appid: APPID as string,
+    appid: APPID,
     exclude: 'minutely,hourly',
     lat,
     lon,
-    units: UNITS || 'imperial',
+    units,
   };
 
   const { daily } = await getWeatherFromCoords(queryParams);
 
-  return daily.map(formatWeatherData).join(' ');
+  const weatherFormatter = makeWeatherFormatter({
+    units: unitMap.get(units) || 'standard',
+    multiple: days > 1
+  });
+
+  return daily.slice(0, days).map(weatherFormatter).join(' ');
 
 }
 
