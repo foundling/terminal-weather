@@ -37,6 +37,7 @@ const DEFAULT_CONFIG:Config = {
 };
 
 type FormatData = {
+  format: string;
   units: string;
   multiple: Boolean;
 };
@@ -190,6 +191,7 @@ async function main() {
   const { daily } = await getWeatherFromCoords(queryParams);
 
   const weatherFormatter = makeWeatherFormatter({
+    format: config.FORMAT,
     units: unitMap.get(units) || 'standard',
     multiple: days > 1
   });
