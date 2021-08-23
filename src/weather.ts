@@ -1,40 +1,7 @@
 import fetch, { Response } from 'node-fetch';
-import { readFile } from 'fs';
-import { homedir } from 'os';
-import path from 'path';
-import { promisify }  from 'util';
 
-import emojiMap, { EmojiMap, Description } from './emojis';
-
-const readFilePromise = promisify(readFile)
-const CONFIG_PATH = path.join(homedir(), '.twconfig'); // TODO: make this a command-line flag
-
-
-type UNIT_OPTION = 'imperial' | 'standard' | 'metric';
-type DISPLAY_OPTION = 'emoji' | 'text';
-type Config = {
-  [key: string]: string | number | UNIT_OPTION | DISPLAY_OPTION;
-  // resolves error: No index signature with a parameter of type 'string' was found on type 'Config'. 
-  APPID: string;
-  UNITS: UNIT_OPTION;
-  DISPLAY: DISPLAY_OPTION;
-  DAYS: string;
-  FORMAT: string;
-  CACHED_AT: string;
-  CACHED_WEATHER: string;
-};
-
-const DEFAULT_CONFIG:Config = {
-  APPID: '',
-  UNITS: 'imperial',
-  DISPLAY: 'emoji',
-  FORMAT: 'd:i', 
-  DAYS: '1',
-  CACHED_AT: '',
-  CACHED_WEATHER:'',
-  // notes on format: d = day, i = icon, t = text, T = TEXT. rest is literal
-  // format is for each day, so if you have days = 4, then 'd:i' is repeated for each day
-};
+import emojiMap from './emojis';
+import IConfig from './config';
 
 type FormatData = {
   format: string;
@@ -42,12 +9,16 @@ type FormatData = {
   multiple: Boolean;
 };
 
+type TEMP_UNIT = 'standard' | 'metric' | 'imperial'; 
 type WeatherQueryOptions = {
+
+  [key: string]: string | number | TEMP_UNIT;
+
   appid: string;
   lat: number;
   lon: number;
   exclude: string;
-  units: 'standard' | 'metric' | 'imperial';
+  units: TEMP_UNIT;
 };
 
 type WeatherDescription = {
@@ -76,44 +47,6 @@ type WeatherResponse = {
   lon: number;
   daily: DailyWeatherResponse[];
 };
-
-function validateConfig(config: Config):void {
-
-  const appId = config['APPID'];
-  const days = parseInt(config['DAYS']) || 0;
-
-  if (!config['APPID']) {
-    console.error('Config File Missing value: APPID');
-    process.exit(1);
-  }
-
-  if (days < 1 || days > 8) {
-    console.error(`Config Error: 'DAYS' must be a number between 1 and 8, inclusive.`);
-    process.exit(1);
-  }
-
-}
-
-async function getConfig(configPath:string, defaultConfig:Config):Promise<Config> {
-
-  const serialized = await readFilePromise(configPath, 'utf-8');
-  const lines = serialized.split('\n').filter(Boolean);
-
-  const config:Config = lines.reduce((config:Config, line:string) => {
-
-    // if a config line has multiple '=', you should throw an config Parsing error.
-    // case: user uses '=' in their format string.
-    // make them escape it? and split the line on [^\]= ?
-    const [name, value] = line.split('=').map(nameOrValue => nameOrValue.trim())
-    config[name] = value;
-
-    return config;
-
-  }, defaultConfig);
-
- return config;
-
-}
 
 async function getLocationFromIpAddress():Promise<Coordinates> {
 
@@ -164,15 +97,10 @@ const makeWeatherFormatter = (formatData:FormatData) => (weatherData: DailyWeath
 
 }
 
-module.exports = exports = async function weather() {
+export default async function weather(config:IConfig) {
 
-  const config = await getConfig(CONFIG_PATH, DEFAULT_CONFIG);
-
-  validateConfig(config);
-
-  const { UNITS, APPID, FORMAT, DAYS } = config;
+  const [ UNITS, APPID, FORMAT, DAYS ] = [config.get('UNITS'), config.get('APPID'), config.get('FORMAT'), config.get('DAYS')];
   const { lat, lon }:Coordinates = await getLocationFromIpAddress();
-  const units = UNITS || 'imperial';
   const days = parseInt(DAYS);
   const unitMap:Map<string,string> = new Map([
     ['standard', 'k'],
@@ -185,19 +113,17 @@ module.exports = exports = async function weather() {
     exclude: 'minutely,hourly',
     lat,
     lon,
-    units,
-  };
+    units: UNITS
+  } as WeatherQueryOptions; // is there a better way? 
 
   const { daily } = await getWeatherFromCoords(queryParams);
 
   const weatherFormatter = makeWeatherFormatter({
-    format: config.FORMAT,
-    units: unitMap.get(units) || 'standard',
+    format: FORMAT,
+    units: unitMap.get(UNITS) || 'standard',
     multiple: days > 1
   });
 
   return daily.slice(0, days).map(weatherFormatter).join(' ');
 
 }
-
-//weather().then(console.log).catch(console.error)
