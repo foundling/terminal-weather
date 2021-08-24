@@ -6,7 +6,7 @@ import IConfig from './config';
 type FormatData = {
   format: string;
   units: string;
-  multiple: Boolean;
+  multiple: boolean;
 };
 
 type TEMP_UNIT = 'standard' | 'metric' | 'imperial'; 
