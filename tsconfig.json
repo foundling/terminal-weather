@@ -2,6 +2,7 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "noImplicitAny": true,
+    "downlevelIteration": true,
     "strictNullChecks": true,
     "lib": [
       "es2015"

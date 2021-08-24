@@ -1,5 +1,0 @@
-tsconfig: add "dom" and "es2015" libs 
-install types for node w/ "npm i @types/node"
-to support importing json, add "resolveJsonModule" : true, to compiler options
-
-:

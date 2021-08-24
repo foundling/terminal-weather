@@ -7,7 +7,7 @@ const writeFilePromise = promisify(writeFile);
 type TEMP_UNIT = 'imperial' | 'standard' | 'metric';
 type DISPLAY_OPTION = 'emoji' | 'text';
 
-export type IConfig = {
+export type ConfigProps = {
 
   [key: string]: string | TEMP_UNIT | DISPLAY_OPTION;
   // resolves error: No index signature with a parameter of type 'string' was found on type 'Config'. 
@@ -27,7 +27,7 @@ type ValidationErrors = string[];
 export default class Config {
 
   path:string;
-  _config:IConfig;
+  _config:ConfigProps;
 
   constructor(path:string) {
 
@@ -61,8 +61,12 @@ export default class Config {
 
   }
 
-  get(key:string):string {
-    return this._config[key];
+  get(keyOrKeys: string | string[]): string | string[]  {
+
+    const keys:string[] = ([] as string[]) .concat(keyOrKeys);
+
+    return keys.length === 1 ? this._config[keys[0]] : keys.map(key => this._config[key]);
+    
   }
 
   set(key:string, value:string):void {
@@ -82,7 +86,7 @@ export default class Config {
       }
     }
     const lines = serializedConfig.split('\n').filter(Boolean);
-    const defaultConfig:IConfig = {
+    const defaultConfig:ConfigProps = {
       APPID: '',
       UNITS: 'imperial',
       DISPLAY: 'emoji',
@@ -94,7 +98,7 @@ export default class Config {
       // format is for each day, so if you have days = 4, then 'd:i' is repeated for each day
     };
 
-    const config:IConfig = lines.reduce((config:IConfig, line:string) => {
+    const config:ConfigProps = lines.reduce((config:ConfigProps, line:string) => {
 
       // if a config line has multiple '=', you should throw an config Parsing error.
       // case: user uses '=' in their format string.
