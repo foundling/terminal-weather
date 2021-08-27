@@ -7,10 +7,10 @@ const writeFilePromise = promisify(writeFile);
 type TEMP_UNIT = 'imperial' | 'standard' | 'metric';
 type DISPLAY_OPTION = 'emoji' | 'text';
 
-export type ConfigProps = {
+export interface IConfig {
 
   [key: string]: string | TEMP_UNIT | DISPLAY_OPTION;
-  // resolves error: No index signature with a parameter of type 'string' was found on type 'Config'. 
+  // this line resolves error: No index signature with a parameter of type 'string' was found on type 'Config'. 
 
   APPID: string;
   UNITS: TEMP_UNIT;
@@ -22,12 +22,14 @@ export type ConfigProps = {
 
 };
 
+type ConfigProp = keyof IConfig;
+
 type ValidationErrors = string[];
 
 export default class Config {
 
   path:string;
-  _config:ConfigProps;
+  _config:IConfig;
 
   constructor(path:string) {
 
@@ -61,15 +63,11 @@ export default class Config {
 
   }
 
-  get(keyOrKeys: string | string[]): string | string[]  {
-
-    const keys:string[] = ([] as string[]) .concat(keyOrKeys);
-
-    return keys.length === 1 ? this._config[keys[0]] : keys.map(key => this._config[key]);
-    
+  get(key: ConfigProp): string  {
+    return this._config[key];
   }
 
-  set(key:string, value:string):void {
+  set(key:ConfigProp, value:string):void {
     this._config[key] = value;
   }
 
@@ -86,7 +84,7 @@ export default class Config {
       }
     }
     const lines = serializedConfig.split('\n').filter(Boolean);
-    const defaultConfig:ConfigProps = {
+    const defaultConfig:IConfig = {
       APPID: '',
       UNITS: 'imperial',
       DISPLAY: 'emoji',
@@ -98,7 +96,7 @@ export default class Config {
       // format is for each day, so if you have days = 4, then 'd:i' is repeated for each day
     };
 
-    const config:ConfigProps = lines.reduce((config:ConfigProps, line:string) => {
+    const config:IConfig = lines.reduce((config:IConfig, line:string) => {
 
       // if a config line has multiple '=', you should throw an config Parsing error.
       // case: user uses '=' in their format string.

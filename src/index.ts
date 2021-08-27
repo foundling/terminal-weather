@@ -2,14 +2,15 @@ import { readFileSync } from 'fs';
 import { homedir } from 'os';
 import path from 'path';
 import weather from './weather';
-
 import Config from './config';
 
-async function tryCacheOrFetchWeather() {
+async function tryCacheOrFetchWeather(currentTime=new Date().getTime()) {
 
   const CONFIG_PATH = path.join(homedir(),'.twconfig');
   const config = new Config(CONFIG_PATH);
+
   await config.read();
+
   const errors = config.validate();
 
   if (errors.length) {
@@ -19,7 +20,7 @@ async function tryCacheOrFetchWeather() {
 
   const existingCache = config.get('CACHED_AT');
   const cachedWeather = config.get('CACHED_WEATHER');
-  const secondsSinceEpochFromNow = new Date().getTime();
+  const secondsSinceEpochFromNow = currentTime;
 
   if (existingCache === '') {
 

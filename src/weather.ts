@@ -1,7 +1,7 @@
 import fetch, { Response } from 'node-fetch';
 
 import emojiMap from './emojis';
-import ConfigProps from './config';
+import IConfig from './config';
 
 const IP_API_URL = 'http://ip-api.com/json';
 const OWM_API_BASE = 'https://api.openweathermap.org/data/2.5/onecall';
@@ -22,6 +22,8 @@ type WeatherQueryOptions = {
   exclude: string;
   units: TEMP_UNIT;
 };
+
+/* Types to express Open Weather Map JSON Response */ 
 
 type WeatherDescription = {
   main: string;
@@ -46,18 +48,10 @@ type Coordinates = {
 
 type WeatherResponse = {
   coords: Coordinates;
-  lon: number;
   daily: DailyWeatherResponse[];
 };
 
-async function getLocationFromIpAddress():Promise<Coordinates> {
-
-  const result:Response = await fetch(IP_API_URL);
-  const { lat, lon } = await result.json();
-
-  return { lat, lon }
-
-}
+/* End Open Weather Map JSON Response Types */
 
 function buildSearchParamString(options: Coordinates & WeatherQueryOptions):string {
 
@@ -68,6 +62,15 @@ function buildSearchParamString(options: Coordinates & WeatherQueryOptions):stri
     return qs + segment;
 
   }, '');
+
+}
+
+async function getLocationFromIpAddress():Promise<Coordinates> {
+
+  const result:Response = await fetch(IP_API_URL);
+  const { lat, lon } = await result.json();
+
+  return { lat, lon }
 
 }
 
@@ -84,7 +87,6 @@ async function getWeatherFromCoords(queryParams: WeatherQueryOptions):Promise<We
 
 const makeWeatherFormatter = (formatData:FormatData) => (weatherData: DailyWeatherResponse):string => {
 
-
   const secondsSinceUnixEpoch = weatherData.dt * 1000; 
   const day = new Date(secondsSinceUnixEpoch).toLocaleDateString('en-US', { weekday: 'short' });
   const { min, max } = weatherData.temp;
@@ -98,9 +100,12 @@ const makeWeatherFormatter = (formatData:FormatData) => (weatherData: DailyWeath
 
 }
 
-export default async function weather(config:ConfigProps) {
+export default async function weather(config:IConfig) {
 
-  const [ UNITS, APPID, FORMAT, DAYS ] = config.get(['UNITS', 'APPID', 'FORMAT', 'DAYS']);
+  const APPID = config.get('APPID');
+  const FORMAT = config.get('FORMAT');
+  const UNITS = config.get('UNITS');
+  const DAYS = config.get('DAYS');
   const { lat, lon }:Coordinates = await getLocationFromIpAddress();
   const days = parseInt(DAYS);
   const unitMap:Map<string,string> = new Map([
