@@ -4,7 +4,7 @@ import { promisify } from 'util';
 const readFilePromise = promisify(readFile);
 const writeFilePromise = promisify(writeFile);
 
-type TEMP_UNIT = 'imperial' | 'standard' | 'metric';
+type TEMP_UNIT = 'f' | 'k' | 'c';
 
 export interface IConfig {
 
@@ -28,6 +28,7 @@ export default class Config {
 
   path:string;
   _config:IConfig;
+  _rawConfig:string;
 
   constructor(path:string) {
 
@@ -39,13 +40,23 @@ export default class Config {
 
     const errors = [];
     const days = parseInt(this._config['DAYS']);
+    const units = this._config['UNITS'];
+    const containsExtraEqualSigns = this._rawConfig.split('\n').some(line => line.split('=').length > 2);
+
+    if (containsExtraEqualSigns) {
+      errors.push("Config File Invalid. Each line should have NAME = VALUE format.  Found more than one '=' on a line.");
+    }
 
     if (!this._config['APPID']) {
       errors.push('Config File Missing value: APPID');
     }
 
     if (!isNaN(days) && days < 1 || days > 8) {
-      errors.push("Config Error: 'DAYS' must be a number between 1 and 8, inclusive.");
+      errors.push(`Config Error: 'DAYS' must be a number between 1 and 8, inclusive. Got ${days}.`);
+    }
+
+    if (!['f','c','k'].includes(units.trim().toLowerCase())) {
+      errors.push(`Config Error: Units must be 'f', 'c' or 'k'. Got ${units}.`);
     }
 
     return errors;
@@ -74,6 +85,7 @@ export default class Config {
     let serializedConfig = '';
     try {
       serializedConfig = await readFilePromise(this.path, 'utf8');
+      this._rawConfig = serializedConfig;
     } catch(e) {
       if (e.code === 'ENOENT') {
         console.error('Error: failed to locate a ~/.twconfig file containing an Open Weather Map API Key (required for weather queries).');
@@ -84,13 +96,11 @@ export default class Config {
     const lines = serializedConfig.split('\n').filter(Boolean);
     const defaultConfig:IConfig = {
       APPID: '',
-      UNITS: 'imperial',
-      FORMAT: 'd:i', 
+      UNITS: 'f',
+      FORMAT: 'i M/mu', 
       DAYS: '1',
       CACHED_AT: '',
       CACHED_WEATHER:'',
-      // notes on format: d = day, i = icon, t = text, T = TEXT. rest is literal
-      // format is for each day, so if you have days = 4, then 'd:i' is repeated for each day
     };
 
     const config:IConfig = lines.reduce((config:IConfig, line:string) => {
