@@ -7,7 +7,7 @@ const IP_API_URL = 'http://ip-api.com/json';
 const OWM_API_BASE = 'https://api.openweathermap.org/data/2.5/onecall';
 
 type FormatData = {
-  format: string;
+  formatString: string;
   units: string;
   multiple: boolean;
 };
@@ -85,18 +85,46 @@ async function getWeatherFromCoords(queryParams: WeatherQueryOptions):Promise<We
 
 }
 
-const makeWeatherFormatter = (formatData:FormatData) => (weatherData: DailyWeatherResponse):string => {
+const formatWeather = ({ formatString, multiple, units }:FormatData) => (weatherData: DailyWeatherResponse):string => {
 
-  const secondsSinceUnixEpoch = weatherData.dt * 1000; 
-  const day = new Date(secondsSinceUnixEpoch).toLocaleDateString('en-US', { weekday: 'short' });
+  // TODO: begin factor-out
+  const { description, main } = weatherData.weather[0];
+  const { icon, text } = emojiMap[main]; // impure
+
   const { min, max } = weatherData.temp;
   const [ hi, lo ] = [ Math.round(max), Math.round(min) ];
-  const { description, main } = weatherData.weather[0];
-  const weather = emojiMap[main].icon ? emojiMap[main].icon : emojiMap[main].text;
-  const howShort = ['S','T'].includes(day[0]) ? 2 : 1; 
-  const dayShort = day.substr(0, howShort); 
 
-  return formatData.multiple ? `${dayShort}: ${hi}/${lo} ${weather}  ` : `${hi}/${lo} ${weather}`;
+  const secondsSinceUnixEpoch = weatherData.dt * 1000; 
+  const weekday = new Date(secondsSinceUnixEpoch).toLocaleDateString('en-US', { weekday: 'short' });
+  const howShort = ['S','T'].includes(weekday[0]) ? 2 : 1; 
+  const weekdayShort = weekday.substr(0, howShort); 
+
+  type FormatMap = {
+    [index: string]: string;
+    i: string;
+    t: string;
+    m: string;
+    M: string;
+    w: string;
+  };
+  let valueMap:FormatMap = {
+    'i': `${icon} `,
+    't': text || '',
+    'm': `${lo}`, 
+    'M': `${hi}`,
+    'w': weekdayShort,
+    'u': `°${units}`,
+  };
+  // end factor-out
+
+  let formattedString = '';
+  let padding = multiple ? '  ' : '';
+
+  for (let c of formatString) {
+    formattedString += (c in valueMap ? valueMap[c] : c);
+  }
+  
+  return formattedString + padding;
 
 }
 
@@ -106,6 +134,7 @@ export default async function weather(config:IConfig) {
   const FORMAT = config.get('FORMAT');
   const UNITS = config.get('UNITS');
   const DAYS = config.get('DAYS');
+
   const { lat, lon }:Coordinates = await getLocationFromIpAddress();
   const days = parseInt(DAYS);
   const unitMap:Map<string,string> = new Map([
@@ -124,12 +153,12 @@ export default async function weather(config:IConfig) {
 
   const { daily } = await getWeatherFromCoords(queryParams);
 
-  const weatherFormatter = makeWeatherFormatter({
-    format: FORMAT,
+  const formatData = {
+    formatString: FORMAT,
     units: unitMap.get(UNITS) || 'standard',
     multiple: days > 1
-  });
+  };
 
-  return daily.slice(0, days).map(weatherFormatter).join(' ');
+  return daily.slice(0, days).map(formatWeather(formatData)).join(' ');
 
 }
