@@ -5,16 +5,14 @@ const readFilePromise = promisify(readFile);
 const writeFilePromise = promisify(writeFile);
 
 type TEMP_UNIT = 'imperial' | 'standard' | 'metric';
-type DISPLAY_OPTION = 'emoji' | 'text';
 
 export interface IConfig {
 
-  [key: string]: string | TEMP_UNIT | DISPLAY_OPTION;
+  [key: string]: string | TEMP_UNIT;
   // this line resolves error: No index signature with a parameter of type 'string' was found on type 'Config'. 
 
   APPID: string;
   UNITS: TEMP_UNIT;
-  DISPLAY: DISPLAY_OPTION;
   DAYS: string;
   FORMAT: string;
   CACHED_AT: string;
@@ -87,7 +85,6 @@ export default class Config {
     const defaultConfig:IConfig = {
       APPID: '',
       UNITS: 'imperial',
-      DISPLAY: 'emoji',
       FORMAT: 'd:i', 
       DAYS: '1',
       CACHED_AT: '',
@@ -102,7 +99,10 @@ export default class Config {
       // case: user uses '=' in their format string.
       // make them escape it? and split the line on [^\]= ?
       const [name, value] = line.split('=').map(nameOrValue => nameOrValue.trim())
-      config[name] = value;
+
+      if (value !== '') {
+        config[name] = value;
+      }
 
       return config;
 
