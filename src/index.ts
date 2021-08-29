@@ -4,7 +4,7 @@ import path from 'path';
 import weather from './weather';
 import Config from './config';
 
-const CACHE_EXPIRATION = 10;
+const CACHE_EXPIRATION_MIN = 10;
 
 async function tryCacheOrFetchWeather(currentTimeMs=new Date().getTime()) {
 
@@ -39,7 +39,7 @@ async function tryCacheOrFetchWeather(currentTimeMs=new Date().getTime()) {
     const msSinceEpochFromCached = new Date(parseInt(existingCache as string)).getTime();
     const deltaMinutes = (currentTimeMs - msSinceEpochFromCached) / (1000 * 60);
 
-    if (deltaMinutes > CACHE_EXPIRATION) {
+    if (deltaMinutes > CACHE_EXPIRATION_MIN) {
 
       const weatherString = await weather(config)
       config.set('CACHED_AT', currentTimeMs.toString());
