@@ -4,6 +4,8 @@ import path from 'path';
 import weather from './weather';
 import Config from './config';
 
+const CACHE_EXPIRATION = 10;
+
 async function tryCacheOrFetchWeather(currentTime=new Date().getTime()) {
 
   const CONFIG_PATH = path.join(homedir(),'.twconfig');
@@ -20,12 +22,12 @@ async function tryCacheOrFetchWeather(currentTime=new Date().getTime()) {
 
   const existingCache = config.get('CACHED_AT');
   const cachedWeather = config.get('CACHED_WEATHER');
-  const secondsSinceEpochFromNow = currentTime;
+  const msSinceEpochFromNow = currentTime;
 
   if (existingCache === '') {
 
     const weatherString = await weather(config)
-    config.set('CACHED_AT', secondsSinceEpochFromNow.toString());
+    config.set('CACHED_AT', msSinceEpochFromNow.toString());
     config.set('CACHED_WEATHER', weatherString);
 
     await config.write();
@@ -34,13 +36,13 @@ async function tryCacheOrFetchWeather(currentTime=new Date().getTime()) {
 
   } else {
 
-    const secondsSinceEpochFromCached = new Date(parseInt(existingCache as string)).getTime();
-    const deltaMinutes = (secondsSinceEpochFromNow - secondsSinceEpochFromCached) / (60 * 1000); 
+    const msSinceEpochFromCached = new Date(parseInt(existingCache as string)).getTime();
+    const deltaMinutes = (msSinceEpochFromNow - msSinceEpochFromCached) / (1000 * 60);
 
-    if (deltaMinutes > 10) {
+    if (deltaMinutes > CACHE_EXPIRATION) {
 
       const weatherString = await weather(config)
-      config.set('CACHED_AT', secondsSinceEpochFromNow.toString());
+      config.set('CACHED_AT', msSinceEpochFromNow.toString());
       config.set('CACHED_WEATHER', weatherString);
 
       await config.write();
@@ -49,7 +51,7 @@ async function tryCacheOrFetchWeather(currentTime=new Date().getTime()) {
 
     }
 
-    return cachedWeather 
+    return cachedWeather;
 
   }
 
