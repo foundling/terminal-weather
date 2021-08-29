@@ -1,15 +1,26 @@
 import fetch, { Response } from 'node-fetch';
 
-import emojiMap from './emojis';
+import emojiMap, { EmojiMap } from './emojis';
 import IConfig from './config';
 
 const IP_API_URL = 'http://ip-api.com/json';
 const OWM_API_BASE = 'https://api.openweathermap.org/data/2.5/onecall';
 
 type FormatData = {
+  emojiMap: EmojiMap;
   formatString: string;
   units: string;
   multiple: boolean;
+};
+
+
+type FormatMap = {
+  [index: string]: string;
+  i: string;
+  t: string;
+  m: string;
+  M: string;
+  w: string;
 };
 
 type TEMP_UNIT = 'standard' | 'metric' | 'imperial'; 
@@ -85,11 +96,10 @@ async function getWeatherFromCoords(queryParams: WeatherQueryOptions):Promise<We
 
 }
 
-const formatWeather = ({ formatString, multiple, units }:FormatData) => (weatherData: DailyWeatherResponse):string => {
+const formatWeather = ({ formatString, multiple, units, emojiMap }:FormatData) => (weatherData: DailyWeatherResponse):string => {
 
-  // TODO: begin factor-out
   const { description, main } = weatherData.weather[0];
-  const { icon, text } = emojiMap[main]; // impure
+  const { icon, text } = emojiMap[main];
 
   const { min, max } = weatherData.temp;
   const [ hi, lo ] = [ Math.round(max), Math.round(min) ];
@@ -99,14 +109,6 @@ const formatWeather = ({ formatString, multiple, units }:FormatData) => (weather
   const howShort = ['S','T'].includes(weekday[0]) ? 2 : 1; 
   const weekdayShort = weekday.substr(0, howShort); 
 
-  type FormatMap = {
-    [index: string]: string;
-    i: string;
-    t: string;
-    m: string;
-    M: string;
-    w: string;
-  };
   let valueMap:FormatMap = {
     'i': `${icon} `,
     't': text || '',
@@ -115,10 +117,9 @@ const formatWeather = ({ formatString, multiple, units }:FormatData) => (weather
     'w': weekdayShort,
     'u': `°${units}`,
   };
-  // end factor-out
 
   let formattedString = '';
-  let padding = multiple ? '  ' : '';
+  let padding = multiple ? ' ' : '';
 
   for (let c of formatString) {
     formattedString += (c in valueMap ? valueMap[c] : c);
@@ -132,15 +133,17 @@ export default async function weather(config:IConfig) {
 
   const APPID = config.get('APPID');
   const FORMAT = config.get('FORMAT');
-  const UNITS = config.get('UNITS');
+  const UNITS = config.get('UNITS').toLowerCase();
   const DAYS = config.get('DAYS');
 
   const { lat, lon }:Coordinates = await getLocationFromIpAddress();
   const days = parseInt(DAYS);
+
+  // FIXME: type this map more narrowly
   const unitMap:Map<string,string> = new Map([
-    ['standard', 'k'],
-    ['imperial', 'f'],
-    ['metric', 'celcius']
+    ['k','standard'],
+    ['f','imperial'],
+    ['c','celcius']
   ]);
 
   const queryParams = {
@@ -148,14 +151,15 @@ export default async function weather(config:IConfig) {
     exclude: 'minutely,hourly',
     lat,
     lon,
-    units: UNITS
+    units: unitMap.get(UNITS)
   } as WeatherQueryOptions; // is there a better way? 
 
   const { daily } = await getWeatherFromCoords(queryParams);
 
   const formatData = {
+    emojiMap,
     formatString: FORMAT,
-    units: unitMap.get(UNITS) || 'standard',
+    units: UNITS,
     multiple: days > 1
   };
 
