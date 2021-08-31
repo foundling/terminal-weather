@@ -13,7 +13,6 @@ type FormatData = {
   multiple: boolean;
 };
 
-
 type FormatMap = {
   [index: string]: string;
   i: string;
@@ -98,7 +97,7 @@ async function getWeatherFromCoords(queryParams: WeatherQueryOptions):Promise<We
 
 const formatWeather = ({ formatString, multiple, units, emojiMap }:FormatData) => (weatherData: DailyWeatherResponse):string => {
 
-  const { description, main } = weatherData.weather[0];
+  const { main } = weatherData.weather[0];
   const { icon, text } = emojiMap[main];
 
   const { min, max } = weatherData.temp;
@@ -154,6 +153,7 @@ export default async function weather(config:IConfig) {
     units: unitMap.get(UNITS)
   } as WeatherQueryOptions; // is there a better way? 
 
+
   const { daily } = await getWeatherFromCoords(queryParams);
 
   const formatData = {
@@ -162,6 +162,7 @@ export default async function weather(config:IConfig) {
     units: UNITS,
     multiple: days > 1
   };
+
 
   return daily.slice(0, days).map(formatWeather(formatData)).join(' ');
 
