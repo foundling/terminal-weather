@@ -128,7 +128,7 @@ const formatWeather = ({ formatString, multiple, units, emojiMap }:FormatData) =
 
 }
 
-export default async function weather(config:IConfig) {
+export default async function getWeather(config:IConfig) {
 
   const APPID = config.get('APPID');
   const FORMAT = config.get('FORMAT');

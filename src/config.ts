@@ -17,6 +17,7 @@ export interface IConfig {
   FORMAT: string;
   CACHED_AT: string;
   CACHED_WEATHER: string;
+  VERSION: string;
 
 };
 
@@ -45,10 +46,6 @@ export default class Config {
 
     if (containsExtraEqualSigns) {
       errors.push("Config File Invalid. Each line should have NAME = VALUE format.  Found more than one '=' on a line.");
-    }
-
-    if (!this._config['APPID']) {
-      errors.push('Config File Missing value: APPID');
     }
 
     if (!isNaN(days) && days < 1 || days > 8) {
@@ -89,7 +86,7 @@ export default class Config {
     } catch(e) {
       if (e.code === 'ENOENT') {
         console.error('Error: failed to locate a ~/.twconfig file containing an Open Weather Map API Key (required for weather queries).');
-        console.error('See Run terminal-weather --help for information on configuring the API key.');
+        console.error('Run terminal-weather --help for information on configuration.');
         process.exit(1);
       }
     }
@@ -101,6 +98,7 @@ export default class Config {
       DAYS: '1',
       CACHED_AT: '',
       CACHED_WEATHER:'',
+      VERSION: JSON.parse(await readFilePromise('../package.json', 'utf8')).version
     };
 
     const config:IConfig = lines.reduce((config:IConfig, line:string) => {
@@ -122,7 +120,7 @@ export default class Config {
 
   }
 
-  async write():Promise<void> {
+  async save():Promise<void> {
     const serializedConfig = this._serialize();
     await writeFilePromise(this.path, serializedConfig, 'utf8');
   }
