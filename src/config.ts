@@ -1,10 +1,96 @@
 import { readFile, writeFile } from 'fs';
 import { promisify } from 'util';
 
+import rls from 'readline-sync';
+
 const readFilePromise = promisify(readFile);
 const writeFilePromise = promisify(writeFile);
 
 type TEMP_UNIT = 'f' | 'k' | 'c';
+
+type Question = {
+  text: string;
+  note: string;
+  field: string;
+  default: string;
+};
+
+
+export function configure(): IConfigurationValues {
+
+  // prompt for api key
+  // prompt for weather format
+  // prompt for days
+  // prompt for temp unit type
+  // open ~/.twconfig
+
+
+  const configValues: IConfigurationValues = {
+    'APPID': '',
+    'FORMAT': 't ',
+    'UNITS': 'f',
+    'DAYS': '1',
+  };
+  const questions: Question[] = [
+    {
+      text: 'API KEY',
+      field: 'APPID',
+      note: 'generated at https://home.openweathermap.org/api_keys', 
+      default: '',
+    },
+    {
+      text: 'FORMAT',
+      field: 'FORMAT',
+      note: 'options [i=icon,t=text][l=lo temp][h=high temp][w=weekday][u=temp unit]',
+      default: 't ',
+    },
+    {
+      text: 'UNITS',
+      field: 'UNITS',
+      note: '[f=farenheit...]',
+      default: 'f',
+    }
+  ,
+    {
+      text: 'DAYS',
+      field: 'DAYS',
+      note: 'range [1,7]',
+      default: '1',
+    }
+  ];
+
+
+
+  for (const q of Object.values(questions)) {
+
+    const formatted = `${q.text} [${q.note}] (default: ${q.default}): `;
+    const answer = rls.question(formatted).trim() || q.default;
+
+    configValues[q.field] = answer;
+
+  }
+
+  return configValues;
+
+}
+
+
+export async function getConfig(configPath:string): Promise<Config> {
+
+  const config = new Config(configPath);
+   
+  await config.read();
+
+  const errors = config.validate();
+
+  if (errors.length) {
+    errors.forEach(error => console.error(error));
+    process.exit(1);
+  }
+
+  return config;
+
+}
 
 export interface IConfig {
 
@@ -21,6 +107,16 @@ export interface IConfig {
 
 };
 
+export interface IConfigurationValues {
+
+  [key: string]: string;
+  APPID: string;
+  UNITS: TEMP_UNIT;
+  DAYS: string;
+  FORMAT: string;
+
+};
+
 type ConfigProp = keyof IConfig;
 
 type ValidationErrors = string[];
@@ -31,9 +127,12 @@ export default class Config {
   _config:IConfig;
   _rawConfig:string;
 
-  constructor(path:string) {
+  constructor(path:string, configValues:IConfigurationValues = { 'APPID': '', 'DAYS': '1', 'FORMAT': 't ', 'UNITS': 'f' }) {
 
     this.path = path;
+
+    if (configValues) {
+    }
 
   }
 
@@ -122,7 +221,7 @@ export default class Config {
 
   async save():Promise<void> {
     const serializedConfig = this._serialize();
-    await writeFilePromise(this.path, serializedConfig, 'utf8');
+    await writeFilePromise(this.path, serializedConfig,'utf8');
   }
 
 }

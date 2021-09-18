@@ -1,13 +1,17 @@
 import { homedir } from 'os';
 import path from 'path';
 import getWeather from './weather';
-import Config from './config';
-import rls from 'readline-sync';
+import Config, { configure, getConfig } from './config';
 
 const CACHE_EXPIRATION_MIN = 10;
 const DEBUG:boolean = 'TW_DEBUG' in process.env;
+const CONFIG_PATH = path.join(homedir(),'.twconfig');
 
-const inArgs = (tokens: string[], args: string[]) => tokens.some(t => args.includes(t)); 
+type WeatherOptions = {
+  config: Config;
+  currentTimeMs?: number;
+  invalidateCache?: boolean;
+};
 
 function usage() {
 
@@ -33,96 +37,8 @@ function info(config: Config): void {
 
 }
 
-type Question = {
-  text: string;
-  note: string;
-  field: string;
-  default: string;
-  answer: string;
-};
-
-async function configure(config:Config) {
-
-  // prompt for api key
-  // prompt for weather format
-  // prompt for days
-  // prompt for temp unit type
-  // open ~/.twconfig
-
-
-  const questions: Question[] = [
-    {
-      text: 'API KEY',
-      field: 'APPID',
-      note: 'generated at https://home.openweathermap.org/api_keys', 
-      default: '',
-      answer: '',
-    },
-    {
-      text: 'FORMAT',
-      field: 'FORMAT',
-      note: 'options [i=icon,t=text][l=lo temp][h=high temp][w=weekday][u=temp unit]',
-      default: 't ',
-      answer: '',
-    },
-    {
-      text: 'UNITS',
-      field: 'UNITS',
-      note: '[f=farenheit...]',
-      default: 'f',
-      answer: '',
-    }
-,
-    {
-      text: 'DAYS',
-      field: 'DAYS',
-      note: 'range [1,7]',
-      default: '1',
-      answer: '',
-    }
-  ];
-
-
-    
-  for (const q of Object.values(questions)) {
-
-    const formatted = `${q.text} [${q.note}] (default: ${q.default}): `;
-    const answer = rls.question(formatted);
-
-    q.answer = answer.trim() || q.answer;
-
-    config.set(q.field, q.answer);
-
-  }
-
-  console.log(config._config);
-  await config.save();
-
-
-}
-
-
-async function getConfig(configPath:string): Promise<Config> {
-
-  const config = new Config(configPath);
-   
-  await config.read();
-
-  const errors = config.validate();
-
-  if (errors.length) {
-    errors.forEach(error => console.error(error));
-    process.exit(1);
-  }
-
-  return config;
-
-}
-
-type WeatherOptions = {
-  config: Config;
-  currentTimeMs?: number;
-  invalidateCache?: boolean;
+function inArgs(tokens: string[], args: string[]) {
+  return tokens.some(t => args.includes(t)); 
 };
 
 async function run() {
@@ -133,11 +49,11 @@ async function run() {
   const showInfo = inArgs(['info'], args);
   const promptMode = inArgs(['-p','--prompt'], args);
   const configureCommand = inArgs(['configure'], args);
+  let config:Config;
 
-  const configPath = path.join(homedir(),'.twconfig');
-  const config:Config = await getConfig(configPath);
 
   if (showInfo) {
+    config = await getConfig(CONFIG_PATH);
     info(config);
     process.exit(0);
   }
@@ -148,22 +64,23 @@ async function run() {
   }
 
   if (configureCommand) {
-    configure(config);
+    const configValues = configure();
+    config = new Config(CONFIG_PATH, configValues)
+    console.log(config);
+    await config.save();
     process.exit(0);
   }
 
-  const options: WeatherOptions = {
-    config,
-    invalidateCache,
-  };
-
-  const weatherString = await tryCacheOrFetchWeather(options);
+  config = await getConfig(CONFIG_PATH);
+  const weatherString = await fetchWeather({ config, invalidateCache });
   return promptMode ? weatherString : weatherString + '\n';
 
 }
 
-async function tryCacheOrFetchWeather({ config, invalidateCache=false, currentTimeMs=new Date().getTime() }: WeatherOptions) {
+async function fetchWeather(options: WeatherOptions) {
   
+  const { config, invalidateCache=false, currentTimeMs=new Date().getTime() } = options;
+
   const existingCache = config.get('CACHED_AT');
   const cachedWeather = config.get('CACHED_WEATHER');
   const appId = config.get('APPID');
