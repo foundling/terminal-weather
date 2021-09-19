@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
     "esModuleInterop": true,
     "noImplicitAny": true,
     "downlevelIteration": true,
     "strictNullChecks": true,
+    "types": ["node"],
     "lib": [
-      "es2015"
+      "es2015",
+      "es6",
+      "dom"
     ],
     "outDir": "dist",
     "target": "es5"
   },
   "exclude": [
     "node_modules",
-    "build"
+    "dist"
   ]
 }
