@@ -33,7 +33,6 @@ type WeatherQueryOptions = {
   units: TEMP_UNIT;
 };
 
-/* Types to express Open Weather Map JSON Response */ 
 
 type WeatherDescription = {
   main: string;
@@ -60,8 +59,6 @@ type WeatherResponse = {
   coords: Coordinates;
   daily: DailyWeatherResponse[];
 };
-
-/* End Open Weather Map JSON Response Types */
 
 function buildSearchParamString(options: Coordinates & WeatherQueryOptions):string {
 
@@ -96,7 +93,7 @@ async function getWeatherFromCoords(queryParams: WeatherQueryOptions):Promise<We
 
 }
 
-const formatWeather = ({ formatString, units, emojiMap }:FormatData) => (weatherData: DailyWeatherResponse):string => {
+const makeWeatherFormatter = ({ formatString, units, emojiMap }:FormatData) => (weatherData: DailyWeatherResponse):string => {
 
   const { main } = weatherData.weather[0];
   const { icon, text } = emojiMap[main];
@@ -138,11 +135,10 @@ export default async function getWeather(config:IConfig) {
   const { lat, lon }:Coordinates = await getLocationFromIpAddress();
   const days = parseInt(DAYS);
 
-  // FIXME: type this map more narrowly
-  const unitMap:Map<string,string> = new Map([
+  const unitMapForApi:Map<string,TEMP_UNIT> = new Map([
     ['k','standard'],
     ['f','imperial'],
-    ['c','celcius']
+    ['c','metric']
   ]);
 
   const queryParams = {
@@ -150,9 +146,8 @@ export default async function getWeather(config:IConfig) {
     exclude: 'minutely,hourly',
     lat,
     lon,
-    units: unitMap.get(UNITS)
-  } as WeatherQueryOptions; // is there a better way? 
-
+    units: unitMapForApi.get(UNITS) || 'imperial'
+  };
 
   const { daily } = await getWeatherFromCoords(queryParams);
 
@@ -163,7 +158,7 @@ export default async function getWeather(config:IConfig) {
     multiple: days > 1
   };
 
-
-  return daily.slice(0, days).map(formatWeather(formatData)).join(' ');
+  const weatherFormatter = makeWeatherFormatter(formatData);
+  return daily.slice(0, days).map(weatherFormatter).join('');
 
 }

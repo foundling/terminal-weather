@@ -56,6 +56,7 @@ var path_1 = __importDefault(require("path"));
 var config_1 = __importDefault(require("./config"));
 var commands_1 = require("./commands");
 var parse_args_1 = __importDefault(require("./parse-args"));
+var log_1 = __importDefault(require("./log"));
 var CONFIG_PATH = path_1.default.join((0, os_1.homedir)(), '.twconfig');
 var args = (0, parse_args_1.default)(process.argv);
 var runArgs = __assign(__assign({}, args), { configPath: CONFIG_PATH });
@@ -105,7 +106,7 @@ if (require.main === module) {
         process.stdout.write(weatherString);
         process.exit(0);
     }).catch(function (e) {
-        console.error(e);
+        (0, log_1.default)(e, 'Error');
         process.exit(1);
     });
 }

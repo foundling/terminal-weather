@@ -62,9 +62,13 @@ var __values = (this && this.__values) || function(o) {
     };
     throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var util_1 = require("util");
+var log_1 = __importDefault(require("./log"));
 var readFilePromise = (0, util_1.promisify)(fs_1.readFile);
 var writeFilePromise = (0, util_1.promisify)(fs_1.writeFile);
 ;
@@ -78,7 +82,6 @@ var Config = /** @class */ (function () {
             FORMAT: 't ',
             CACHED_AT: '',
             CACHED_WEATHER: '',
-            VERSION: '1.0.0'
         };
     }
     Config.prototype.validate = function () {
@@ -87,13 +90,13 @@ var Config = /** @class */ (function () {
         var units = this._config['UNITS'];
         var containsExtraEqualSigns = this._rawConfig.split('\n').some(function (line) { return line.split('=').length > 2; });
         if (containsExtraEqualSigns) {
-            errors.push("Config File Invalid. Each line should have NAME = VALUE format.  Found more than one '=' on a line.");
+            errors.push("Config file ~/.twconfig Invalid: Each line should have NAME=VALUE format.  Found more than one '=' on a single line.");
         }
         if (!isNaN(days) && days < 1 || days > 8) {
-            errors.push("Config Error: 'DAYS' must be a number between 1 and 8, inclusive. Got " + days + ".");
+            errors.push("Config value 'DAYS' must be a number between 1 and 8, inclusive. Got " + days + ".");
         }
         if (!['f', 'c', 'k'].includes(units.trim().toLowerCase())) {
-            errors.push("Config Error: Units must be 'f', 'c' or 'k'. Got " + units + ".");
+            errors.push("Config value 'UNITS' must be 'f', 'c' or 'k'. Got " + units + ".");
         }
         return errors;
     };
@@ -131,49 +134,42 @@ var Config = /** @class */ (function () {
     Config.prototype.fromFile = function (filepath) {
         if (filepath === void 0) { filepath = this.path; }
         return __awaiter(this, void 0, void 0, function () {
-            var serializedConfig, e_2, lines, defaultConfig, _a, _b, config;
-            var _c;
-            return __generator(this, function (_d) {
-                switch (_d.label) {
+            var serializedConfig, e_2, lines, defaultConfig, config;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         serializedConfig = '';
-                        _d.label = 1;
+                        _a.label = 1;
                     case 1:
-                        _d.trys.push([1, 3, , 4]);
+                        _a.trys.push([1, 3, , 4]);
                         return [4 /*yield*/, readFilePromise(filepath, 'utf8')];
                     case 2:
-                        serializedConfig = _d.sent();
+                        serializedConfig = _a.sent();
                         this._rawConfig = serializedConfig;
                         return [3 /*break*/, 4];
                     case 3:
-                        e_2 = _d.sent();
+                        e_2 = _a.sent();
                         if (e_2.code === 'ENOENT') {
-                            console.error('Error: failed to locate a ~/.twconfig file containing an Open Weather Map API Key (required for weather queries).');
-                            console.error('Run terminal-weather --help for information on configuration.');
+                            (0, log_1.default)('No ~/.twconfig file found. see terminal-weather --help for usage.', 'Error');
                             process.exit(1);
                         }
                         return [3 /*break*/, 4];
                     case 4:
                         lines = serializedConfig.split('\n').filter(Boolean);
-                        _c = {
+                        defaultConfig = {
                             APPID: '',
                             UNITS: 'f',
                             FORMAT: 'i l/hu',
                             DAYS: '1',
                             CACHED_AT: '',
-                            CACHED_WEATHER: ''
+                            CACHED_WEATHER: '',
                         };
-                        _b = (_a = JSON).parse;
-                        return [4 /*yield*/, readFilePromise('./package.json', 'utf8')];
-                    case 5:
-                        defaultConfig = (_c.VERSION = _b.apply(_a, [_d.sent()]).version,
-                            _c);
                         config = lines.reduce(function (config, line) {
                             // if a config line has multiple '=', you should throw an config Parsing error.
                             // case: user uses '=' in their format string.
                             // make them escape it? and split the line on [^\]= ?
-                            var _a = __read(line.split('=').map(function (nameOrValue) { return nameOrValue.trim(); }), 2), name = _a[0], value = _a[1];
-                            config[name] = value;
+                            var _a = __read(line.split('='), 2), name = _a[0], value = _a[1];
+                            config[name.trim()] = value; // don't trim so user can adjust formatting space via config FORMAT val.
                             return config;
                         }, defaultConfig);
                         this._config = config;

@@ -1,5 +1,6 @@
 import Config from '../config';
 import getWeather from '../weather';
+import log from '../log';
 
 const CACHE_EXPIRATION_MIN = 10;
 const DEBUG:boolean = 'TW_DEBUG' in process.env;
@@ -19,7 +20,7 @@ export default async function fetchWeather(options: WeatherOptions) {
   const appId = config.get('APPID');
 
   if (!appId) {
-    console.log("Error: Missing APPID from your config. Please run 'configure'");
+    log("Missing APPID from your config. Please run 'terminal-weather configure'", 'Error');
     process.exit(1);
   }
 

@@ -3,6 +3,7 @@
     "module": "commonjs",
     "declaration": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "noImplicitAny": true,
     "downlevelIteration": true,
     "strictNullChecks": true,

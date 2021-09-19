@@ -6,7 +6,7 @@ export type ParsedArgs = {
   'configureApp': boolean;
 };
 
-export type RunArgs = ParsedArgs & { configPath: string };
+export type RunArgs = ParsedArgs & { configPath: string, version: string };
 
 export function inArgs(tokens: string[], args: string[]):boolean {
   return tokens.some(t => args.includes(t)); 

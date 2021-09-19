@@ -5,11 +5,14 @@ import path from 'path';
 import Config from './config';
 import { configure, help, info, fetchWeather } from './commands';
 import parseArgs, { RunArgs, ParsedArgs } from './parse-args'; 
+import log from './log';
+import * as pkg from '../package.json';
 
 const CONFIG_PATH = path.join(homedir(),'.twconfig');
+const VERSION = pkg.version;
 
 const args: ParsedArgs = parseArgs(process.argv);
-const runArgs = {...args, ...{ configPath: CONFIG_PATH }};
+const runArgs = {...args, ...{ configPath: CONFIG_PATH, version: VERSION }};
 
 export default async function run(runArgs:RunArgs) {
 
@@ -19,10 +22,11 @@ export default async function run(runArgs:RunArgs) {
     showHelp,
     showInfo,
     promptMode,
-    configureApp
+    configureApp,
+    version
   } = runArgs; 
 
-  let config = new Config(configPath);
+  let config = new Config(configPath, version);
 
   if (showHelp) {
     help();
@@ -50,7 +54,7 @@ export default async function run(runArgs:RunArgs) {
 
 if (require.main === module) { 
 
-  // run if we're being executed directly
+  // call run if we're being executed directly
   // https://nodejs.org/dist/latest-v16.x/docs/api/all.html#modules_accessing_the_main_module
   run(runArgs).then(weatherString => {
 
@@ -59,7 +63,7 @@ if (require.main === module) {
 
   }).catch(e => {
 
-    console.error(e);
+    log(e, 'Error');
     process.exit(1);
 
   });

@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'fs';
 import { promisify } from 'util';
+import log from './log';
 
 const readFilePromise = promisify(readFile);
 const writeFilePromise = promisify(writeFile);
@@ -9,7 +10,6 @@ type TEMP_UNIT = 'f' | 'k' | 'c';
 export interface IConfig {
 
   [key: string]: string | TEMP_UNIT;
-  // this line resolves error: No index signature with a parameter of type 'string' was found on type 'Config'. 
 
   APPID: string;
   UNITS: TEMP_UNIT;
@@ -28,13 +28,15 @@ type ValidationErrors = string[];
 export default class Config {
 
   path:string;
+  version:string;
   _config:IConfig;
   _rawConfig:string;
 
+  constructor(filepath:string, version: string) {
 
-  constructor(filepath:string) {
 
     this.path = filepath;
+    this.version = version;
 
     this._config = {
       APPID: '',
@@ -43,7 +45,7 @@ export default class Config {
       FORMAT: 't ',
       CACHED_AT: '',
       CACHED_WEATHER: '',
-      VERSION: '1.0.0'
+      VERSION: this.version,
     }
 
   }
@@ -56,15 +58,15 @@ export default class Config {
     const containsExtraEqualSigns = this._rawConfig.split('\n').some(line => line.split('=').length > 2);
 
     if (containsExtraEqualSigns) {
-      errors.push("Config File Invalid. Each line should have NAME = VALUE format.  Found more than one '=' on a line.");
+      errors.push("Config file ~/.twconfig Invalid: Each line should have NAME=VALUE format.  Found more than one '=' on a single line.");
     }
 
     if (!isNaN(days) && days < 1 || days > 8) {
-      errors.push(`Config Error: 'DAYS' must be a number between 1 and 8, inclusive. Got ${days}.`);
+      errors.push(`Config value 'DAYS' must be a number between 1 and 8, inclusive. Got ${days}.`);
     }
 
     if (!['f','c','k'].includes(units.trim().toLowerCase())) {
-      errors.push(`Config Error: Units must be 'f', 'c' or 'k'. Got ${units}.`);
+      errors.push(`Config value 'UNITS' must be 'f', 'c' or 'k'. Got ${units}.`);
     }
 
     return errors;
@@ -107,12 +109,12 @@ export default class Config {
     } catch(e) {
 
       if (e.code === 'ENOENT') {
-        console.error('Error: failed to locate a ~/.twconfig file containing an Open Weather Map API Key (required for weather queries).');
-        console.error('Run terminal-weather --help for information on configuration.');
+        log('No ~/.twconfig file found. see terminal-weather --help for usage.', 'Error');
         process.exit(1);
       }
 
     }
+
 
     const lines = serializedConfig.split('\n').filter(Boolean);
     const defaultConfig:IConfig = {
@@ -122,7 +124,7 @@ export default class Config {
       DAYS: '1',
       CACHED_AT: '',
       CACHED_WEATHER:'',
-      VERSION: JSON.parse(await readFilePromise('./package.json', 'utf8')).version
+      VERSION: this.version,
     };
 
     const config:IConfig = lines.reduce((config:IConfig, line:string) => {
@@ -130,8 +132,8 @@ export default class Config {
       // if a config line has multiple '=', you should throw an config Parsing error.
       // case: user uses '=' in their format string.
       // make them escape it? and split the line on [^\]= ?
-      const [name, value] = line.split('=').map(nameOrValue => nameOrValue.trim())
-      config[name] = value;
+      const [name, value] = line.split('=')
+      config[name.trim()] = value; // don't trim so user can adjust formatting space via config FORMAT val.
 
       return config;
 

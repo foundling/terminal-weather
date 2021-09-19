@@ -70,7 +70,6 @@ var node_fetch_1 = __importDefault(require("node-fetch"));
 var emojis_1 = __importDefault(require("./emojis"));
 var IP_API_URL = 'http://ip-api.com/json';
 var OWM_API_BASE = 'https://api.openweathermap.org/data/2.5/onecall';
-/* End Open Weather Map JSON Response Types */
 function buildSearchParamString(options) {
     return Object.entries(options).reduce(function (qs, entry) {
         var _a = __read(entry, 2), key = _a[0], value = _a[1];
@@ -114,7 +113,7 @@ function getWeatherFromCoords(queryParams) {
         });
     });
 }
-var formatWeather = function (_a) {
+var makeWeatherFormatter = function (_a) {
     var formatString = _a.formatString, units = _a.units, emojiMap = _a.emojiMap;
     return function (weatherData) {
         var e_1, _a;
@@ -153,7 +152,7 @@ var formatWeather = function (_a) {
 };
 function getWeather(config) {
     return __awaiter(this, void 0, void 0, function () {
-        var APPID, FORMAT, UNITS, DAYS, _a, lat, lon, days, unitMap, queryParams, daily, formatData;
+        var APPID, FORMAT, UNITS, DAYS, _a, lat, lon, days, unitMapForApi, queryParams, daily, formatData, weatherFormatter;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
@@ -165,17 +164,17 @@ function getWeather(config) {
                 case 1:
                     _a = _b.sent(), lat = _a.lat, lon = _a.lon;
                     days = parseInt(DAYS);
-                    unitMap = new Map([
+                    unitMapForApi = new Map([
                         ['k', 'standard'],
                         ['f', 'imperial'],
-                        ['c', 'celcius']
+                        ['c', 'metric']
                     ]);
                     queryParams = {
                         appid: APPID,
                         exclude: 'minutely,hourly',
                         lat: lat,
                         lon: lon,
-                        units: unitMap.get(UNITS)
+                        units: unitMapForApi.get(UNITS) || 'imperial'
                     };
                     return [4 /*yield*/, getWeatherFromCoords(queryParams)];
                 case 2:
@@ -186,7 +185,8 @@ function getWeather(config) {
                         units: UNITS,
                         multiple: days > 1
                     };
-                    return [2 /*return*/, daily.slice(0, days).map(formatWeather(formatData)).join(' ')];
+                    weatherFormatter = makeWeatherFormatter(formatData);
+                    return [2 /*return*/, daily.slice(0, days).map(weatherFormatter).join('')];
             }
         });
     });

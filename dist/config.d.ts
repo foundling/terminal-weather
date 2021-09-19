@@ -7,7 +7,6 @@ export interface IConfig {
     FORMAT: string;
     CACHED_AT: string;
     CACHED_WEATHER: string;
-    VERSION: string;
 }
 declare type ConfigProp = keyof IConfig;
 declare type ValidationErrors = string[];
