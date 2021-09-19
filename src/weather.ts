@@ -78,7 +78,7 @@ function buildSearchParamString(options: Coordinates & WeatherQueryOptions):stri
 async function getLocationFromIpAddress():Promise<Coordinates> {
 
   const result:Response = await fetch(IP_API_URL);
-  const { lat, lon } = await result.json();
+  const { lat, lon } = (await result.json()) as Coordinates;
 
   return { lat, lon }
 
@@ -89,13 +89,14 @@ async function getWeatherFromCoords(queryParams: WeatherQueryOptions):Promise<We
   const qp = buildSearchParamString(queryParams);
   const weatherEndpoint = `${OWM_API_BASE}?${qp}`
   const response = await fetch(weatherEndpoint);
-  const weather = await response.json();
+  const weather = (await response.json()) as WeatherResponse;
+  //note: https://github.com/node-fetch/node-fetch/issues/1262#issuecomment-913597816
 
   return weather
 
 }
 
-const formatWeather = ({ formatString, multiple, units, emojiMap }:FormatData) => (weatherData: DailyWeatherResponse):string => {
+const formatWeather = ({ formatString, units, emojiMap }:FormatData) => (weatherData: DailyWeatherResponse):string => {
 
   const { main } = weatherData.weather[0];
   const { icon, text } = emojiMap[main];
@@ -118,14 +119,12 @@ const formatWeather = ({ formatString, multiple, units, emojiMap }:FormatData) =
   };
 
   let formattedString = '';
-  //let padding = multiple ? ' ' : '';
-  let padding = '';
 
   for (let c of formatString) {
     formattedString += (c in valueMap ? valueMap[c] : c);
   }
   
-  return formattedString + padding;
+  return formattedString;
 
 }
 
