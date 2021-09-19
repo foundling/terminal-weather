@@ -9,7 +9,7 @@ const CONFIG_PATH = path.join(homedir(),'.twconfig');
 const args: ParsedArgs = parseArgs(process.argv);
 const runArgs = {...args, ...{ configPath: CONFIG_PATH }};
 
-async function run(runArgs:RunArgs) {
+export default async function run(runArgs:RunArgs) {
 
   const { 
     configPath, 
@@ -41,19 +41,25 @@ async function run(runArgs:RunArgs) {
 
 
   await config.fromFile(configPath);
-  const weatherString = await fetchWeather({ config, invalidateCache });
+  let weatherString = await fetchWeather({ config, invalidateCache });
   return promptMode ? weatherString : weatherString + '\n';
 
 }
 
-run(runArgs).then(weatherString => {
+if (require.main === module) { 
 
-  process.stdout.write(weatherString); 
-  process.exit(0);
+  // run if we're being executed directly
+  // https://nodejs.org/dist/latest-v16.x/docs/api/all.html#modules_accessing_the_main_module
+  run(runArgs).then(weatherString => {
 
-}).catch(e => {
+    process.stdout.write(weatherString); 
+    process.exit(0);
 
-  console.error(e);
-  process.exit(1);
+  }).catch(e => {
 
-});
+    console.error(e);
+    process.exit(1);
+
+  });
+
+}
