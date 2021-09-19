@@ -1,57 +1,59 @@
 import { homedir } from 'os';
 import path from 'path';
-import weather from './weather';
 import Config from './config';
+import { configure, help, info, fetchWeather } from './commands';
+import parseArgs, { RunArgs, ParsedArgs } from './parse-args'; 
 
-const CACHE_EXPIRATION_MIN = 10;
+const CONFIG_PATH = path.join(homedir(),'.twconfig');
 
-async function tryCacheOrFetchWeather(currentTimeMs=new Date().getTime()) {
+const args: ParsedArgs = parseArgs(process.argv);
+const runArgs = {...args, ...{ configPath: CONFIG_PATH }};
 
-  const CONFIG_PATH = path.join(homedir(),'.twconfig');
-  const config = new Config(CONFIG_PATH);
-   
-  await config.read();
+async function run(runArgs:RunArgs) {
 
-  const errors = config.validate();
+  const { 
+    configPath, 
+    invalidateCache,
+    showHelp,
+    showInfo,
+    promptMode,
+    configureApp
+  } = runArgs; 
 
-  if (errors.length) {
-    errors.forEach(error => console.error(error));
-    process.exit(1);
+  let config = new Config(configPath);
+
+  if (showHelp) {
+    help();
+    process.exit(0);
   }
 
-  const existingCache = config.get('CACHED_AT');
-  const cachedWeather = config.get('CACHED_WEATHER');
-
-  if (existingCache === '') {
-
-    const weatherString = await weather(config)
-    config.set('CACHED_AT', currentTimeMs.toString());
-    config.set('CACHED_WEATHER', weatherString);
-
-    await config.write();
-
-    return weatherString;
-
-  } else {
-
-    const msSinceEpochFromCached = new Date(parseInt(existingCache as string)).getTime();
-    const deltaMinutes = (currentTimeMs - msSinceEpochFromCached) / (1000 * 60);
-
-    if (deltaMinutes > CACHE_EXPIRATION_MIN) {
-
-      const weatherString = await weather(config)
-      config.set('CACHED_AT', currentTimeMs.toString());
-      config.set('CACHED_WEATHER', weatherString);
-
-      await config.write();
-      return weatherString;
-
-    }
-
-    return cachedWeather;
-
+  if (showInfo) {
+    await config.fromFile(configPath);
+    info(config);
+    process.exit(0);
   }
+
+  if (configureApp) {
+    config.fromObject(configure());
+    await config.save();
+    process.exit(0);
+  }
+
+
+  await config.fromFile(configPath);
+  const weatherString = await fetchWeather({ config, invalidateCache });
+  return promptMode ? weatherString : weatherString + '\n';
 
 }
 
-tryCacheOrFetchWeather().then(console.log).catch(console.error);
+run(runArgs).then(weatherString => {
+
+  process.stdout.write(weatherString); 
+  process.exit(0);
+
+}).catch(e => {
+
+  console.error(e);
+  process.exit(1);
+
+});

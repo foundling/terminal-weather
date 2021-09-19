@@ -17,8 +17,8 @@ type FormatMap = {
   [index: string]: string;
   i: string;
   t: string;
-  m: string;
-  M: string;
+  l: string;
+  h: string;
   w: string;
 };
 
@@ -111,14 +111,15 @@ const formatWeather = ({ formatString, multiple, units, emojiMap }:FormatData) =
   let valueMap:FormatMap = {
     'i': `${icon} `,
     't': text || '',
-    'm': `${lo}`, 
-    'M': `${hi}`,
+    'l': `${lo}`, 
+    'h': `${hi}`,
     'w': weekdayShort,
     'u': `°${units}`,
   };
 
   let formattedString = '';
-  let padding = multiple ? ' ' : '';
+  //let padding = multiple ? ' ' : '';
+  let padding = '';
 
   for (let c of formatString) {
     formattedString += (c in valueMap ? valueMap[c] : c);
@@ -128,7 +129,7 @@ const formatWeather = ({ formatString, multiple, units, emojiMap }:FormatData) =
 
 }
 
-export default async function weather(config:IConfig) {
+export default async function getWeather(config:IConfig) {
 
   const APPID = config.get('APPID');
   const FORMAT = config.get('FORMAT');

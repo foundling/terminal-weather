@@ -17,6 +17,7 @@ export interface IConfig {
   FORMAT: string;
   CACHED_AT: string;
   CACHED_WEATHER: string;
+  VERSION: string;
 
 };
 
@@ -30,9 +31,20 @@ export default class Config {
   _config:IConfig;
   _rawConfig:string;
 
-  constructor(path:string) {
 
-    this.path = path;
+  constructor(filepath:string) {
+
+    this.path = filepath;
+
+    this._config = {
+      APPID: '',
+      UNITS: 'f',
+      DAYS: '1',
+      FORMAT: 't ',
+      CACHED_AT: '',
+      CACHED_WEATHER: '',
+      VERSION: '1.0.0'
+    }
 
   }
 
@@ -47,10 +59,6 @@ export default class Config {
       errors.push("Config File Invalid. Each line should have NAME = VALUE format.  Found more than one '=' on a line.");
     }
 
-    if (!this._config['APPID']) {
-      errors.push('Config File Missing value: APPID');
-    }
-
     if (!isNaN(days) && days < 1 || days > 8) {
       errors.push(`Config Error: 'DAYS' must be a number between 1 and 8, inclusive. Got ${days}.`);
     }
@@ -63,9 +71,9 @@ export default class Config {
 
   }
 
-  _serialize():string {
+  _serialize(config=this._config):string {
 
-    return Object.entries(this._config).reduce((prev:string, cur:[string, string]) => {
+    return Object.entries(config).reduce((prev:string, cur:[string, string]) => {
       const [key, value] = cur;
       return prev += `${key}=${value}\n`; 
     }, '');
@@ -80,27 +88,41 @@ export default class Config {
     this._config[key] = value;
   }
 
-  async read():Promise<void> {
+  fromObject(configValues: Partial<IConfig>):void {
+    for (let [key, value] of Object.entries(configValues)) {
+      if (value) this.set(key, value);
+    }
+    // FIXME: missing version here. make async?
+  }
+
+  async fromFile(filepath: string = this.path):Promise<void> {
 
     let serializedConfig = '';
+
     try {
-      serializedConfig = await readFilePromise(this.path, 'utf8');
+
+      serializedConfig = await readFilePromise(filepath, 'utf8');
       this._rawConfig = serializedConfig;
+
     } catch(e) {
+
       if (e.code === 'ENOENT') {
         console.error('Error: failed to locate a ~/.twconfig file containing an Open Weather Map API Key (required for weather queries).');
-        console.error('See Run terminal-weather --help for information on configuring the API key.');
+        console.error('Run terminal-weather --help for information on configuration.');
         process.exit(1);
       }
+
     }
+
     const lines = serializedConfig.split('\n').filter(Boolean);
     const defaultConfig:IConfig = {
       APPID: '',
       UNITS: 'f',
-      FORMAT: 'i M/mu', 
+      FORMAT: 'i l/hu', 
       DAYS: '1',
       CACHED_AT: '',
       CACHED_WEATHER:'',
+      VERSION: JSON.parse(await readFilePromise('./package.json', 'utf8')).version
     };
 
     const config:IConfig = lines.reduce((config:IConfig, line:string) => {
@@ -109,10 +131,7 @@ export default class Config {
       // case: user uses '=' in their format string.
       // make them escape it? and split the line on [^\]= ?
       const [name, value] = line.split('=').map(nameOrValue => nameOrValue.trim())
-
-      if (value !== '') {
-        config[name] = value;
-      }
+      config[name] = value;
 
       return config;
 
@@ -122,9 +141,9 @@ export default class Config {
 
   }
 
-  async write():Promise<void> {
+  async save():Promise<void> {
     const serializedConfig = this._serialize();
-    await writeFilePromise(this.path, serializedConfig, 'utf8');
+    await writeFilePromise(this.path, serializedConfig,'utf8');
   }
 
 }
