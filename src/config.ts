@@ -37,6 +37,7 @@ export default class Config {
 
     this.path = filepath;
     this.version = version;
+    this._rawConfig = '';
 
     this._config = {
       APPID: '',
@@ -106,7 +107,7 @@ export default class Config {
       serializedConfig = await readFilePromise(filepath, 'utf8');
       this._rawConfig = serializedConfig;
 
-    } catch(e) {
+    } catch(e:any) { // FIXME
 
       if (e.code === 'ENOENT') {
         log('No ~/.twconfig file found. see terminal-weather --help for usage.', 'Error');

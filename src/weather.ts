@@ -62,7 +62,7 @@ type WeatherResponse = {
 
 function buildSearchParamString(options: Coordinates & WeatherQueryOptions):string {
 
-  return Object.entries(options).reduce((qs: string, entry: [string, string]) => {
+  return Object.entries(options).reduce((qs: string, entry: [string, string | number]) => {
 
     const [key, value] = entry;
     const segment = `&${key}=${value}`;
