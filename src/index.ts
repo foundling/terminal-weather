@@ -6,10 +6,9 @@ import Config from './config';
 import { configure, help, info, fetchWeather } from './commands';
 import parseArgs, { RunArgs, ParsedArgs } from './parse-args'; 
 import log from './log';
-import * as pkg from '../package.json';
+import { version as VERSION } from './version.json';
 
 const CONFIG_PATH = path.join(homedir(),'.twconfig');
-const VERSION = pkg.version;
 
 const args: ParsedArgs = parseArgs(process.argv);
 const runArgs = {...args, ...{ configPath: CONFIG_PATH, version: VERSION }};
