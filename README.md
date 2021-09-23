@@ -62,6 +62,9 @@ A minimal, configurable command-line tool for displaying the current weather in 
       VERSION=1.0.0
 
 ````
+
+Note: I haven't had the time to find a good arg parsing library for typescript, so currently the argument parsing isn't great.  For now, pass one argument or option at a time :(
+
 ## Configuration
 
 + Run `terminal-weather configure` and give `terminal-weather` the values it needs to store so it can continually query the api.
