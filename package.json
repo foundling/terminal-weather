@@ -1,7 +1,7 @@
 {
   "name": "tw",
   "bin": {
-    "terminal-weather": "dist/index.js"
+    "terminal-weather": "./bin/terminal-weather.js"
   },
   "version": "1.0.0",
   "description": "",
@@ -9,6 +9,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepublish": "tsc tsconfig.json",
+    "postinstall": "node scripts/postinstall.js",
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"

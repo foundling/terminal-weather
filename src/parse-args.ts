@@ -27,5 +27,5 @@ export default function parseArgs(args: string[]):ParsedArgs {
     promptMode,
     configureApp,
   };
-}
 
+}

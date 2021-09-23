@@ -8,15 +8,15 @@ import parseArgs, { RunArgs, ParsedArgs } from './parse-args';
 import log from './log';
 import { version as VERSION } from './version.json';
 
-const CONFIG_PATH = path.join(homedir(),'.twconfig');
 
-const args: ParsedArgs = parseArgs(process.argv);
-const runArgs = {...args, ...{ configPath: CONFIG_PATH, version: VERSION }};
 
-export default async function run(runArgs:RunArgs) {
+export default async function run(argv: string[]) {
+
+  const parsedArgs: ParsedArgs = parseArgs(argv);
+  const configPath = path.join(homedir(),'.twconfig');
+  const runArgs:RunArgs = {...parsedArgs, ...{configPath, version: VERSION }};
 
   const { 
-    configPath, 
     invalidateCache,
     showHelp,
     showInfo,
@@ -55,7 +55,7 @@ if (require.main === module) {
 
   // call run if we're being executed directly
   // https://nodejs.org/dist/latest-v16.x/docs/api/all.html#modules_accessing_the_main_module
-  run(runArgs).then(weatherString => {
+  run(process.argv.slice(2)).then(weatherString => {
 
     process.stdout.write(weatherString); 
     process.exit(0);
