@@ -1,5 +1,5 @@
 {
-  "name": "tw",
+  "name": "terminal-weather",
   "bin": {
     "terminal-weather": "./bin/terminal-weather.js"
   },
