@@ -73,8 +73,8 @@ If you want to include terminal-weather in your bash prompt, there are a couple 
 
 If you update your display, units and/or format string, the update will not be visible until the cache expires. To make the effects immediately visible, pass the `-n` flag to explicitly invalidate the cache at the same time. E.g.: 
 
-    terminal-weather -n --display=icon
-    terminal-weather -nd=icon 
+    terminal-weather -n
+    terminal-weather --invalidate-cache
 
 ### Known Issues
 
