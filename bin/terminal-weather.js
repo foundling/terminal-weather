@@ -25,7 +25,6 @@ function inPromptMode(args) {
 }
 
 function run(tw) {
-  console.log('regular invocation!')
   // regular cli invocation
   tw(ARGV).then(weatherString => {
     const lineEnding = PROMPT_MODE ? '' : '\n';
