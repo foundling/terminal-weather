@@ -1,60 +1,71 @@
 #!/usr/bin/env node
 
 /*
- * A lazy-loading approach. Check if cache is expired before importing cli.
- * Reason: rapid re-rendering in terminal when using cached value.
+ * To support rapid re-rendering in the terminal prompt (the whole point of this little cli),
+ * we need to check the cache for missing or expired timestamp before running the main program.
+ *
+ * That is triggered when the -p, --prompt flag is thrown.  It is possible, however, that the
+ * user hasn't configured the app, so if the twconfig file is missing, we want to handle that case.
+ * 
  */
 
 const { readFile } = require('fs');
 const { homedir } = require('os');
-
-const configFile = homedir() + '/.twconfig';
+const ARGV = process.argv.slice(2);
+const CONFIG_FILE = homedir() + '/.twconfig';
 const MS_PER_MINUTE = 1000 * 60;
 const CACHE_INTERVAL_MINUTES = 10;
+const PROMPT_MODE = inPromptMode(ARGV);
 
-// only allow: terminal-weather [-p] [-n]
-// args are prechopped, i.e., process.argv.slice(2)
 function inPromptMode(args) {
 
   const allowed = [ '-p', '--prompt' ];
-  return args.every(arg => allowed.includes(arg));
+  return args.length > 0 && args.every(arg => allowed.includes(arg));
 
 }
 
-/* 
-  * The only invocation that is optimized is the -p, --prompt flag. 
-  * Everything else is a regular call to the cli.
-  */
+function run(tw) {
+  console.log('regular invocation!')
+  // regular cli invocation
+  tw(ARGV).then(weatherString => {
+    const lineEnding = PROMPT_MODE ? '' : '\n';
+    process.stdout.write(`${weatherString}${lineEnding}`);
+  }).catch(e => { console.error(e); });
+}
+
 function tryCacheThenRun() {
 
-  if (!inPromptMode(process.argv.slice(2))) {
-    //console.log('[regular invocation]');
-    const { default: run } = require('../dist/index.js');
-    return run(process.argv)
-        .then(weatherString => {
-
-          const lineEnding = inPromptMode(process.argv.slice(2)) ? '' : '\n';
-          process.stdout.write(`${weatherString}${lineEnding}`);
-
-        }).catch(e => {
-          console.error(e);
-        });
+  // not in prompt mode, run in regular mode.
+  if (!PROMPT_MODE) {
+    const { default: prog } = require('../dist/index.js');
+    return run(prog);
   }
 
-  // if we're in prompt mode, skip other code, try to output weather as efficiently as possible.
-  readFile(configFile, 'utf-8', function(e, data) {
+  // if in prompt mode: emit weather string as efficiently as possible.
+  readFile(CONFIG_FILE, 'utf-8', function(e, data) {
 
+    // issue reading config file
     if (e) {
-      console.log("Error: No config file exists at ~/.twconfig");
-      process.exit(1);
+      if (e.code === 'ENOENT') {
+        process.stdout.write('no ~/.twconfig! ');
+        process.exit(1);
+      } else {
+        process.stdout.write('error! ');
+        process.exit(1);
+      }
     }
 
-    const config = data.split('\n').map(line => line.split('='));
+    // config available, check for api key and cache time stamp
     let now = new Date().getTime();
     let cachedAt;
     let cachedWeather;
+    let apiKey;
 
+    const config = data.split('\n').map(line => line.split('='));
     for (let [k,v] of config) {
+      if (k === 'APPID') {
+        apiKey = v;
+      }
       if (k === 'CACHED_AT') {
         cachedAt = new Date(parseInt(v)).getTime();
       }
@@ -63,28 +74,18 @@ function tryCacheThenRun() {
       }
     }
 
+    if (!apiKey) {
+      process.stdout.write('api key missing! ');
+      process.exit(1);
+    }
+
+    // cache exists and hasn't expired
     if (cachedAt && (now - cachedAt)/MS_PER_MINUTE < CACHE_INTERVAL_MINUTES) {
-
-      //console.log('[cache exists, not expired]');
-      const promptFlag = inPromptMode(process.argv.slice(2));
-      process.stdout.write(promptFlag ? cachedWeather : cachedWeather + '\n');
-
+      process.stdout.write(PROMPT_MODE ? cachedWeather : cachedWeather + '\n');
     } else {
-
-      //console.log('[no cache entry ... fetch from source]');
-
-      const { default: run } = require('../dist/index.js');
-
-      return run(process.argv)
-        .then(weatherString => {
-
-          const lineEnding = inPromptMode(process.argv.slice(2)) ? '' : '\n';
-          process.stdout.write(`${weatherString}${lineEnding}`);
-
-        }).catch(e => {
-          console.error(e);
-        });
-
+      // cache expired, run in regular cli mode.
+      const { default: prog } = require('../dist/index.js');
+      return run(prog)
     }
 
   });

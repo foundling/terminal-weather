@@ -162,7 +162,7 @@ var Config = /** @class */ (function () {
                         defaultConfig = {
                             APPID: '',
                             UNITS: 'f',
-                            FORMAT: 'i l/hu',
+                            FORMAT: 'i l/hu ',
                             DAYS: '1',
                             CACHED_AT: '',
                             CACHED_WEATHER: '',
