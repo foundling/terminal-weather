@@ -6,11 +6,11 @@
  */
 
 const { readFile } = require('fs');
-const { homedir } = require('os')
+const { homedir } = require('os');
 
-const configFile = homedir() + '/.twconfig'
+const configFile = homedir() + '/.twconfig';
 const MS_PER_MINUTE = 1000 * 60;
-const CACHE_INTERVAL_MINUTES = 10
+const CACHE_INTERVAL_MINUTES = 10;
 
 // only allow: terminal-weather [-p] [-n]
 // args are prechopped, i.e., process.argv.slice(2)
@@ -46,11 +46,11 @@ function tryCacheThenRun() {
 
     if (e) {
       console.log("Error: No config file exists at ~/.twconfig");
-      process.exit(1)
+      process.exit(1);
     }
 
-    const config = data.split('\n').map(line => line.split('='))
-    let now = new Date().getTime()
+    const config = data.split('\n').map(line => line.split('='));
+    let now = new Date().getTime();
     let cachedAt;
     let cachedWeather;
 
