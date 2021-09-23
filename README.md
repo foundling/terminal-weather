@@ -2,10 +2,12 @@
 
 A minimal, configurable command-line tool for displaying the current weather in your location, optimized for re-rendering in your terminal prompt.
 
+🌥 🌧 🌞 🌥
+
 ## Requirements
 
 + An [openweathermap.org](http://openweathermap.org) API key
-+ NodeJS v7.0 and npm
++ Node 12 and up
 
 ## Installation
 
