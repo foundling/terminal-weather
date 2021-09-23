@@ -7,11 +7,6 @@ export default function help() {
     tw --help, -h                prints help
     tw info                      prints config values
     tw configure                 configure tw 
-    tw set config                lets you enter api key and format
-    tw get config                lets you enter api key and format
-    tw set format <fmt string>   updates your config w/ new format               
-    tw get format                prints your format string
-    tw set days <int>            sets days in config to int, must be [1,7] 
 
     format values:
       i: icon
@@ -21,7 +16,7 @@ export default function help() {
       w: weekday
       u: temp units
 
-    example format string: "i l/h u"
+    example format string: "i l/h u "
   `
   console.log(msg);
 }
