@@ -121,7 +121,7 @@ export default class Config {
     const defaultConfig:IConfig = {
       APPID: '',
       UNITS: 'f',
-      FORMAT: 'i l/hu', 
+      FORMAT: 'i l/hu ', 
       DAYS: '1',
       CACHED_AT: '',
       CACHED_WEATHER:'',
