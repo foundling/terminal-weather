@@ -83,4 +83,4 @@ Terminal weather's responsiveness seems to degrade if you source your ~/.bashrc 
 ### Removing `terminal-weather` 
 
 + First (definitely do this first!!!), remove terminal weather call from the bash prompt in your `~/.bashrc` file 
-+ run `terminal-weather uninstall`.  This is equivalent to running `npm uninstall -g terminal-weather`.
++ Then run `npm uninstall -g terminal-weather`.
