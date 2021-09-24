@@ -1,5 +1,7 @@
 import { IConfig } from '../config';
 import rls from 'readline-sync';
+import chalk from 'chalk';
+import help from './help';
 
 type Question = {
   text: string;
@@ -22,13 +24,13 @@ export default function configure(): Partial<IConfig> {
     {
       text: 'API KEY',
       field: 'APPID',
-      note: 'generated at https://home.openweathermap.org/api_keys', 
+      note: '', 
       default: '',
     },
     {
       text: 'FORMAT',
       field: 'FORMAT',
-      note: 'options [i=icon,t=text][l=lo temp][h=high temp][w=weekday][u=temp unit]',
+      note: 'i=icon, t=text, l=lo temp, h=high temp, w=weekday, u=temp unit (f,c,m)',
       default: 't ',
     },
     {
@@ -47,9 +49,12 @@ export default function configure(): Partial<IConfig> {
   ];
 
 
+  console.log(chalk.blue("\nLet's add an API key and configure terminal-weather's appearance.\nRun terminal-weather --help for more information...\n"))
+  help();
+
   for (const q of Object.values(questions)) {
 
-    const formatted = `${q.text} [${q.note}] (default: ${q.default}): `;
+    const formatted = `${chalk.underline.white(q.text)} ${q.note ? '[ ' + q.note + ' ]' : ''} (${chalk.blue('default')}: ${q.default || 'N/A'}): `;
     const answer = rls.question(formatted).trim() || q.default;
 
     configValues[q.field] = answer;
