@@ -1,5 +1,4 @@
 export default function help() {
-
   const msg = `
     usage: terminal-weather [ option | command ]
 
@@ -34,4 +33,3 @@ export default function help() {
   `
   console.log(msg);
 }
-
