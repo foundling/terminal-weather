@@ -71,7 +71,6 @@ var util_1 = require("util");
 var log_1 = __importDefault(require("./log"));
 var readFilePromise = (0, util_1.promisify)(fs_1.readFile);
 var writeFilePromise = (0, util_1.promisify)(fs_1.writeFile);
-console.log('delete me, this is a git hooks precommit test');
 ;
 var Config = /** @class */ (function () {
     function Config(filepath, version) {
