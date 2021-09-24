@@ -8,8 +8,6 @@ import parseArgs, { RunArgs, ParsedArgs } from './parse-args';
 import log from './log';
 import { version as VERSION } from './version.json';
 
-
-
 export default async function run(argv: string[]) {
 
   const parsedArgs: ParsedArgs = parseArgs(argv);
@@ -53,8 +51,6 @@ export default async function run(argv: string[]) {
 
 if (require.main === module) { 
 
-  // call run if we're being executed directly
-  // https://nodejs.org/dist/latest-v16.x/docs/api/all.html#modules_accessing_the_main_module
   run(process.argv.slice(2)).then(weatherString => {
 
     process.stdout.write(weatherString); 

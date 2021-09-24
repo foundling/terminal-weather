@@ -2,6 +2,7 @@ import fetch, { Response } from 'node-fetch';
 
 import emojiMap, { EmojiMap } from './emojis';
 import IConfig from './config';
+import log from './log';
 
 const IP_API_URL = 'http://ip-api.com/json';
 const OWM_API_BASE = 'https://api.openweathermap.org/data/2.5/onecall';
@@ -32,7 +33,6 @@ type WeatherQueryOptions = {
   exclude: string;
   units: TEMP_UNIT;
 };
-
 
 type WeatherDescription = {
   main: string;
@@ -74,9 +74,20 @@ function buildSearchParamString(options: Coordinates & WeatherQueryOptions):stri
 
 async function getLocationFromIpAddress():Promise<Coordinates> {
 
-  const result:Response = await fetch(IP_API_URL);
-  const { lat, lon } = (await result.json()) as Coordinates;
+  let result:Response | null = null;
 
+  try {
+    result = await fetch(IP_API_URL);
+    if (result.status !== 200) {
+      log(result.statusText, 'Error');
+      process.exit(1);
+    }
+  } catch(e) {
+    log(`${e}`, 'Error');
+    process.exit(1);
+  }
+
+  const { lat, lon } = (await result.json()) as Coordinates;
   return { lat, lon }
 
 }
@@ -85,9 +96,21 @@ async function getWeatherFromCoords(queryParams: WeatherQueryOptions):Promise<We
 
   const qp = buildSearchParamString(queryParams);
   const weatherEndpoint = `${OWM_API_BASE}?${qp}`
-  const response = await fetch(weatherEndpoint);
+  let response;
+
+  try {
+    response = await fetch(weatherEndpoint);
+    if (response.status !== 200) {
+      log(response.statusText, 'Error');
+      process.exit(1);
+    }
+  } catch(e) {
+    log(`${e}`, 'Error');
+    process.exit(1);
+  }
+
+  //note on use of 'as' below: https://github.com/node-fetch/node-fetch/issues/1262#issuecomment-913597816
   const weather = (await response.json()) as WeatherResponse;
-  //note: https://github.com/node-fetch/node-fetch/issues/1262#issuecomment-913597816
 
   return weather
 
