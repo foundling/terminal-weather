@@ -4,7 +4,8 @@ A minimal and configurable command-line tool for displaying the weather in your 
 
 🌥 🌧 🌞 🌥
 
-[![asciicast](https://asciinema.org/a/437855.svg)](https://asciinema.org/a/437855)
+[![asciicast](https://asciinema.org/a/14.png)](https://asciinema.org/a/14)
+
 
 ## Requirements
 
