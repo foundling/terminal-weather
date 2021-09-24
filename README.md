@@ -7,7 +7,7 @@ A minimal and configurable command-line tool for displaying the weather in your 
 ## Requirements
 
 + An [openweathermap.org](http://openweathermap.org) API key. You can generate one [here](https://home.openweathermap.org/api_keys), but you will need to register with OpenWeather first.
-+ Node 12 and up
++ Node 8 and up
 
 ## Installation
 
@@ -89,10 +89,6 @@ If you update your display, units and/or format string, the update will not be v
 
     terminal-weather -n
     terminal-weather --invalidate-cache
-
-### Known Issues
-
-Terminal weather's responsiveness seems to degrade if you source your ~/.bashrc multiple times from within a shell. Try running `exec $SHELL -l`. 
 
 ### Removing `terminal-weather` 
 
