@@ -11,11 +11,15 @@
 
 const { readFile } = require('fs');
 const { homedir } = require('os');
+const path = require('path');
 const ARGV = process.argv.slice(2);
 const CONFIG_FILE = homedir() + '/.twconfig';
 const MS_PER_MINUTE = 1000 * 60;
 const CACHE_INTERVAL_MINUTES = 10;
 const PROMPT_MODE = inPromptMode(ARGV);
+const VERSION = require('../package.json').version;
+const CONFIG_PATH = path.join(homedir(),'.twconfig');
+
 
 function inPromptMode(args) {
 
@@ -24,9 +28,9 @@ function inPromptMode(args) {
 
 }
 
-function run(tw) {
+function run(terminalWeather) {
   // regular cli invocation
-  tw(ARGV).then(weatherString => {
+  terminalWeather(ARGV, VERSION, CONFIG_PATH).then(weatherString => {
     const lineEnding = PROMPT_MODE ? '' : '\n';
     process.stdout.write(`${weatherString}${lineEnding}`);
   }).catch(e => { console.error(e); });

@@ -1,27 +1,20 @@
 #!/usr/bin/env node
 
-import { homedir } from 'os';
-import path from 'path';
 import Config from './config';
 import { configure, help, info, fetchWeather } from './commands';
-import parseArgs, { RunArgs, ParsedArgs } from './parse-args'; 
-import log from './log';
-import { version as VERSION } from './version.json';
+import parseArgs, { ParsedArgs } from './parse-args';
 
-export default async function run(argv: string[]) {
+export default async function run(argv: string[], version:string, configPath:string) {
 
   const parsedArgs: ParsedArgs = parseArgs(argv);
-  const configPath = path.join(homedir(),'.twconfig');
-  const runArgs:RunArgs = {...parsedArgs, ...{configPath, version: VERSION }};
 
-  const { 
+  const {
     invalidateCache,
     showHelp,
     showInfo,
     promptMode,
     configureApp,
-    version
-  } = runArgs; 
+  } = parsedArgs;
 
   let config = new Config(configPath, version);
 
@@ -46,21 +39,5 @@ export default async function run(argv: string[]) {
   await config.fromFile(configPath);
   let weatherString = await fetchWeather({ config, invalidateCache });
   return promptMode ? weatherString : weatherString + '\n';
-
-}
-
-if (require.main === module) { 
-
-  run(process.argv.slice(2)).then(weatherString => {
-
-    process.stdout.write(weatherString); 
-    process.exit(0);
-
-  }).catch(e => {
-
-    log(e, 'Error');
-    process.exit(1);
-
-  });
 
 }
