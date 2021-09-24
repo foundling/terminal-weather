@@ -5,8 +5,6 @@ import log from './log';
 const readFilePromise = promisify(readFile);
 const writeFilePromise = promisify(writeFile);
 
-console.log('delete me, this is a git hooks precommit test');
-
 type TEMP_UNIT = 'f' | 'k' | 'c';
 
 export interface IConfig {
