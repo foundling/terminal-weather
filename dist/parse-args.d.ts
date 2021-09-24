@@ -5,9 +5,5 @@ export declare type ParsedArgs = {
     'promptMode': boolean;
     'configureApp': boolean;
 };
-export declare type RunArgs = ParsedArgs & {
-    configPath: string;
-    version: string;
-};
 export declare function inArgs(tokens: string[], args: string[]): boolean;
 export default function parseArgs(args: string[]): ParsedArgs;

@@ -15,6 +15,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var readline_sync_1 = __importDefault(require("readline-sync"));
+var chalk_1 = __importDefault(require("chalk"));
+var help_1 = __importDefault(require("./help"));
 function configure() {
     var e_1, _a;
     // this should be a partial of Config type
@@ -28,13 +30,13 @@ function configure() {
         {
             text: 'API KEY',
             field: 'APPID',
-            note: 'generated at https://home.openweathermap.org/api_keys',
+            note: '',
             default: '',
         },
         {
             text: 'FORMAT',
             field: 'FORMAT',
-            note: 'options [i=icon,t=text][l=lo temp][h=high temp][w=weekday][u=temp unit]',
+            note: 'i=icon, t=text, l=lo temp, h=high temp, w=weekday, u=temp unit (f,c,m)',
             default: 't ',
         },
         {
@@ -50,10 +52,12 @@ function configure() {
             default: '1',
         }
     ];
+    console.log(chalk_1.default.blue("\nLet's add an API key and configure terminal-weather's appearance.\nRun terminal-weather --help for more information...\n"));
+    (0, help_1.default)();
     try {
         for (var _b = __values(Object.values(questions)), _c = _b.next(); !_c.done; _c = _b.next()) {
             var q = _c.value;
-            var formatted = q.text + " [" + q.note + "] (default: " + q.default + "): ";
+            var formatted = chalk_1.default.underline.white(q.text) + " " + (q.note ? '[ ' + q.note + ' ]' : '') + " (" + chalk_1.default.blue('default') + ": " + (q.default || 'N/A') + "): ";
             var answer = readline_sync_1.default.question(formatted).trim() || q.default;
             configValues[q.field] = answer;
         }
