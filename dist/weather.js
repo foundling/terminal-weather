@@ -68,6 +68,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var node_fetch_1 = __importDefault(require("node-fetch"));
 var emojis_1 = __importDefault(require("./emojis"));
+var log_1 = __importDefault(require("./log"));
 var IP_API_URL = 'http://ip-api.com/json';
 var OWM_API_BASE = 'https://api.openweathermap.org/data/2.5/onecall';
 function buildSearchParamString(options) {
@@ -79,14 +80,29 @@ function buildSearchParamString(options) {
 }
 function getLocationFromIpAddress() {
     return __awaiter(this, void 0, void 0, function () {
-        var result, _a, lat, lon;
+        var result, e_1, _a, lat, lon;
         return __generator(this, function (_b) {
             switch (_b.label) {
-                case 0: return [4 /*yield*/, (0, node_fetch_1.default)(IP_API_URL)];
+                case 0:
+                    result = null;
+                    _b.label = 1;
                 case 1:
-                    result = _b.sent();
-                    return [4 /*yield*/, result.json()];
+                    _b.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, (0, node_fetch_1.default)(IP_API_URL)];
                 case 2:
+                    result = _b.sent();
+                    if (result.status !== 200) {
+                        (0, log_1.default)(result.statusText, 'Error');
+                        process.exit(1);
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    e_1 = _b.sent();
+                    (0, log_1.default)("" + e_1, 'Error');
+                    process.exit(1);
+                    return [3 /*break*/, 4];
+                case 4: return [4 /*yield*/, result.json()];
+                case 5:
                     _a = (_b.sent()), lat = _a.lat, lon = _a.lon;
                     return [2 /*return*/, { lat: lat, lon: lon }];
             }
@@ -95,19 +111,31 @@ function getLocationFromIpAddress() {
 }
 function getWeatherFromCoords(queryParams) {
     return __awaiter(this, void 0, void 0, function () {
-        var qp, weatherEndpoint, response, weather;
+        var qp, weatherEndpoint, response, e_2, weather;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     qp = buildSearchParamString(queryParams);
                     weatherEndpoint = OWM_API_BASE + "?" + qp;
-                    return [4 /*yield*/, (0, node_fetch_1.default)(weatherEndpoint)];
+                    _a.label = 1;
                 case 1:
-                    response = _a.sent();
-                    return [4 /*yield*/, response.json()];
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, (0, node_fetch_1.default)(weatherEndpoint)];
                 case 2:
+                    response = _a.sent();
+                    if (response.status !== 200) {
+                        (0, log_1.default)(response.statusText, 'Error');
+                        process.exit(1);
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    e_2 = _a.sent();
+                    (0, log_1.default)("" + e_2, 'Error');
+                    process.exit(1);
+                    return [3 /*break*/, 4];
+                case 4: return [4 /*yield*/, response.json()];
+                case 5:
                     weather = (_a.sent());
-                    //note: https://github.com/node-fetch/node-fetch/issues/1262#issuecomment-913597816
                     return [2 /*return*/, weather];
             }
         });
@@ -116,7 +144,7 @@ function getWeatherFromCoords(queryParams) {
 var makeWeatherFormatter = function (_a) {
     var formatString = _a.formatString, units = _a.units, emojiMap = _a.emojiMap;
     return function (weatherData) {
-        var e_1, _a;
+        var e_3, _a;
         var main = weatherData.weather[0].main;
         var _b = emojiMap[main], icon = _b.icon, text = _b.text;
         var _c = weatherData.temp, min = _c.min, max = _c.max;
@@ -140,12 +168,12 @@ var makeWeatherFormatter = function (_a) {
                 formattedString += (c in valueMap ? valueMap[c] : c);
             }
         }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        catch (e_3_1) { e_3 = { error: e_3_1 }; }
         finally {
             try {
                 if (formatString_1_1 && !formatString_1_1.done && (_a = formatString_1.return)) _a.call(formatString_1);
             }
-            finally { if (e_1) throw e_1.error; }
+            finally { if (e_3) throw e_3.error; }
         }
         return formattedString;
     };

@@ -101,8 +101,6 @@ function run(argv) {
 }
 exports.default = run;
 if (require.main === module) {
-    // call run if we're being executed directly
-    // https://nodejs.org/dist/latest-v16.x/docs/api/all.html#modules_accessing_the_main_module
     run(process.argv.slice(2)).then(function (weatherString) {
         process.stdout.write(weatherString);
         process.exit(0);
