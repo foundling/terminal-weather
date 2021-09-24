@@ -1,16 +1,5 @@
 #!/usr/bin/env node
 "use strict";
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -51,23 +40,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var os_1 = require("os");
-var path_1 = __importDefault(require("path"));
 var config_1 = __importDefault(require("./config"));
 var commands_1 = require("./commands");
 var parse_args_1 = __importDefault(require("./parse-args"));
-var log_1 = __importDefault(require("./log"));
-var version_json_1 = require("./version.json");
-function run(argv) {
+function run(argv, version, configPath) {
     return __awaiter(this, void 0, void 0, function () {
-        var parsedArgs, configPath, runArgs, invalidateCache, showHelp, showInfo, promptMode, configureApp, version, config, weatherString;
+        var parsedArgs, invalidateCache, showHelp, showInfo, promptMode, configureApp, config, weatherString;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     parsedArgs = (0, parse_args_1.default)(argv);
-                    configPath = path_1.default.join((0, os_1.homedir)(), '.twconfig');
-                    runArgs = __assign(__assign({}, parsedArgs), { configPath: configPath, version: version_json_1.version });
-                    invalidateCache = runArgs.invalidateCache, showHelp = runArgs.showHelp, showInfo = runArgs.showInfo, promptMode = runArgs.promptMode, configureApp = runArgs.configureApp, version = runArgs.version;
+                    invalidateCache = parsedArgs.invalidateCache, showHelp = parsedArgs.showHelp, showInfo = parsedArgs.showInfo, promptMode = parsedArgs.promptMode, configureApp = parsedArgs.configureApp;
                     config = new config_1.default(configPath, version);
                     if (showHelp) {
                         (0, commands_1.help)();
@@ -100,12 +83,3 @@ function run(argv) {
     });
 }
 exports.default = run;
-if (require.main === module) {
-    run(process.argv.slice(2)).then(function (weatherString) {
-        process.stdout.write(weatherString);
-        process.exit(0);
-    }).catch(function (e) {
-        (0, log_1.default)(e, 'Error');
-        process.exit(1);
-    });
-}
