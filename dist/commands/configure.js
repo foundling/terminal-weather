@@ -19,12 +19,12 @@ var chalk_1 = __importDefault(require("chalk"));
 var help_1 = __importDefault(require("./help"));
 function configure() {
     var e_1, _a;
-    // this should be a partial of Config type
     var configValues = {
         'APPID': '',
         'FORMAT': 't ',
         'UNITS': 'f',
         'DAYS': '1',
+        'CACHE_INTERVAL_MINUTES': '10',
     };
     var questions = [
         {
@@ -52,7 +52,8 @@ function configure() {
             default: '1',
         }
     ];
-    console.log(chalk_1.default.blue("\nLet's add an API key and configure terminal-weather's appearance.\nRun terminal-weather --help for more information...\n"));
+    var configureMsg = "\n  Let's add an API key and configure terminal-weather's appearance.\n  Run terminal-weather --help for more information...\n  ";
+    console.log(chalk_1.default.blue(configureMsg));
     (0, help_1.default)();
     try {
         for (var _b = __values(Object.values(questions)), _c = _b.next(); !_c.done; _c = _b.next()) {

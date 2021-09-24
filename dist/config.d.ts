@@ -7,6 +7,7 @@ export interface IConfig {
     FORMAT: string;
     CACHED_AT: string;
     CACHED_WEATHER: string;
+    CACHE_INTERVAL_MINUTES: string;
     VERSION: string;
 }
 declare type ConfigProp = keyof IConfig;

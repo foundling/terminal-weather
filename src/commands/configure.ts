@@ -12,12 +12,12 @@ type Question = {
 
 export default function configure(): Partial<IConfig> {
 
-  // this should be a partial of Config type
   const configValues:Partial<IConfig> = {
     'APPID': '',
     'FORMAT': 't ',
     'UNITS': 'f',
     'DAYS': '1',
+    'CACHE_INTERVAL_MINUTES': '10',
   };
 
   const questions: Question[] = [
@@ -49,7 +49,11 @@ export default function configure(): Partial<IConfig> {
   ];
 
 
-  console.log(chalk.blue("\nLet's add an API key and configure terminal-weather's appearance.\nRun terminal-weather --help for more information...\n"))
+  const configureMsg = `
+  Let's add an API key and configure terminal-weather's appearance.
+  Run terminal-weather --help for more information...
+  `
+  console.log(chalk.blue(configureMsg));
   help();
 
   for (const q of Object.values(questions)) {

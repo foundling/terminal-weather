@@ -17,6 +17,7 @@ export default async function fetchWeather(options: WeatherOptions) {
 
   const existingCache = config.get('CACHED_AT');
   const cachedWeather = config.get('CACHED_WEATHER');
+  const cacheInterval = config.get('CACHE_EXPIRATION_MIN');
   const appId = config.get('APPID');
 
   if (!appId) {
@@ -42,7 +43,11 @@ export default async function fetchWeather(options: WeatherOptions) {
     const msSinceEpochFromCached = new Date(parseInt(existingCache as string)).getTime();
     const deltaMinutes = (currentTimeMs - msSinceEpochFromCached) / (1000 * 60);
 
-    if (deltaMinutes > CACHE_EXPIRATION_MIN) {
+    // take user interval if it exists and is greater than 10
+    const cacheExpirationDuration = cacheInterval && parseInt(cacheInterval) >= CACHE_EXPIRATION_MIN ?
+      cacheInterval : CACHE_EXPIRATION_MIN;
+
+    if (deltaMinutes > cacheExpirationDuration) {
 
       const weatherString = await getWeather(config)
       config.set('CACHED_AT', currentTimeMs.toString());

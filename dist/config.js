@@ -84,6 +84,7 @@ var Config = /** @class */ (function () {
             FORMAT: 't ',
             CACHED_AT: '',
             CACHED_WEATHER: '',
+            CACHE_INTERVAL_MINUTES: '10',
             VERSION: this.version,
         };
     }
@@ -166,6 +167,7 @@ var Config = /** @class */ (function () {
                             DAYS: '1',
                             CACHED_AT: '',
                             CACHED_WEATHER: '',
+                            CACHE_INTERVAL_MINUTES: '10',
                             VERSION: this.version,
                         };
                         config = lines.reduce(function (config, line) {

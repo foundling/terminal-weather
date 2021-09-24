@@ -17,6 +17,7 @@ export interface IConfig {
   FORMAT: string;
   CACHED_AT: string;
   CACHED_WEATHER: string;
+  CACHE_INTERVAL_MINUTES: string;
   VERSION: string;
 
 };
@@ -46,6 +47,7 @@ export default class Config {
       FORMAT: 't ',
       CACHED_AT: '',
       CACHED_WEATHER: '',
+      CACHE_INTERVAL_MINUTES: '10',
       VERSION: this.version,
     }
 
@@ -125,6 +127,7 @@ export default class Config {
       DAYS: '1',
       CACHED_AT: '',
       CACHED_WEATHER:'',
+      CACHE_INTERVAL_MINUTES: '10',
       VERSION: this.version,
     };
 
