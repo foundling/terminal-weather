@@ -4,6 +4,8 @@ A minimal and configurable command-line tool for displaying the weather in your 
 
 🌥 🌧 🌞 🌥
 
+[![asciicast](https://asciinema.org/a/437855.svg)](https://asciinema.org/a/437855)
+
 ## Requirements
 
 + An [openweathermap.org](http://openweathermap.org) API key. You can generate one [here](https://home.openweathermap.org/api_keys), but you will need to register with OpenWeather first.
