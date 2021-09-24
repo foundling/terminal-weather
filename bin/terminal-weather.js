@@ -15,7 +15,7 @@ const path = require('path');
 const ARGV = process.argv.slice(2);
 const CONFIG_FILE = homedir() + '/.twconfig';
 const MS_PER_MINUTE = 1000 * 60;
-const CACHE_INTERVAL_MINUTES = 10;
+const DEFAULT_CACHE_INTERVAL_MINUTES = 10;
 const PROMPT_MODE = inPromptMode(ARGV);
 const VERSION = require('../package.json').version;
 const CONFIG_PATH = path.join(homedir(),'.twconfig');
@@ -62,6 +62,7 @@ function tryCacheThenRun() {
     let now = new Date().getTime();
     let cachedAt;
     let cachedWeather;
+    let cacheIntervalMinutes;
     let apiKey;
 
     const config = data.split('\n').map(line => line.split('='));
@@ -75,6 +76,9 @@ function tryCacheThenRun() {
       if (k === 'CACHED_WEATHER') {
         cachedWeather = v;
       }
+      if (k === 'CACHE_INTERVAL_MINUTES') {
+        cacheIntervalMinutes = v;
+      }
     }
 
     if (!apiKey) {
@@ -83,7 +87,9 @@ function tryCacheThenRun() {
     }
 
     // cache exists and hasn't expired
-    if (cachedAt && (now - cachedAt)/MS_PER_MINUTE < CACHE_INTERVAL_MINUTES) {
+    let cacheIntervalToUse = Math.max(
+    parseInt(cacheIntervalMinutes) || DEFAULT_CACHE_INTERVAL_MINUTES, DEFAULT_CACHE_INTERVAL_MINUTES)
+    if (cachedAt && (now - cachedAt)/MS_PER_MINUTE <  cacheIntervalToUse) {
       process.stdout.write(PROMPT_MODE ? cachedWeather : cachedWeather + '\n');
     } else {
       // cache expired, run in regular cli mode.

@@ -7,6 +7,7 @@ export type EmojiMap = {
   [ k: string ]: Description;
 };
 
+// TODO: colorize text. rain=blue, snow=white
 const emojiMap:EmojiMap = {
   Thunderstorm: { 
     text: 'tstorm',

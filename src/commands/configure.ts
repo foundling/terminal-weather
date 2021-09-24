@@ -17,14 +17,13 @@ export default function configure(): Partial<IConfig> {
     'FORMAT': 't ',
     'UNITS': 'f',
     'DAYS': '1',
-    'CACHE_INTERVAL_MINUTES': '10',
   };
 
   const questions: Question[] = [
     {
       text: 'API KEY',
       field: 'APPID',
-      note: '', 
+      note: 'This is required to run terminal weather',
       default: '',
     },
     {
@@ -58,6 +57,7 @@ export default function configure(): Partial<IConfig> {
 
   for (const q of Object.values(questions)) {
 
+    // TODO: break the parts up, then format them.  don't show default stuff if there is none.
     const formatted = `${chalk.underline.white(q.text)} ${q.note ? '[ ' + q.note + ' ]' : ''} (${chalk.blue('default')}: ${q.default || 'N/A'}): `;
     const answer = rls.question(formatted).trim() || q.default;
 

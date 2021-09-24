@@ -27,8 +27,7 @@ export default function help() {
       UNITS=f
       FORMAT=i
       DAYS=4
-      CACHED_AT=1632439018291
-      CACHED_WEATHER=🌥 🌧 🌞 🌥 
+      CACHE_INTERVAL_MINUTES=10
       VERSION=1.0.0
   `
   console.log(msg);

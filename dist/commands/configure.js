@@ -24,13 +24,12 @@ function configure() {
         'FORMAT': 't ',
         'UNITS': 'f',
         'DAYS': '1',
-        'CACHE_INTERVAL_MINUTES': '10',
     };
     var questions = [
         {
             text: 'API KEY',
             field: 'APPID',
-            note: '',
+            note: 'This is required to run terminal weather',
             default: '',
         },
         {
@@ -58,6 +57,7 @@ function configure() {
     try {
         for (var _b = __values(Object.values(questions)), _c = _b.next(); !_c.done; _c = _b.next()) {
             var q = _c.value;
+            // TODO: break the parts up, then format them.  don't show default stuff if there is none.
             var formatted = chalk_1.default.underline.white(q.text) + " " + (q.note ? '[ ' + q.note + ' ]' : '') + " (" + chalk_1.default.blue('default') + ": " + (q.default || 'N/A') + "): ";
             var answer = readline_sync_1.default.question(formatted).trim() || q.default;
             configValues[q.field] = answer;

@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -87,6 +98,7 @@ var Config = /** @class */ (function () {
             CACHE_INTERVAL_MINUTES: '10',
             VERSION: this.version,
         };
+        this._defaults = Object.freeze(__assign({}, this._config));
     }
     Config.prototype.validate = function () {
         var errors = [];
@@ -111,6 +123,13 @@ var Config = /** @class */ (function () {
             return prev += key + "=" + value + "\n";
         }, '');
     };
+    Object.defineProperty(Config.prototype, "defaults", {
+        get: function () {
+            return this._defaults;
+        },
+        enumerable: false,
+        configurable: true
+    });
     Config.prototype.get = function (key) {
         return this._config[key];
     };
@@ -122,8 +141,9 @@ var Config = /** @class */ (function () {
         try {
             for (var _b = __values(Object.entries(configValues)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var _d = __read(_c.value, 2), key = _d[0], value = _d[1];
-                if (value)
+                if (value) {
                     this.set(key, value);
+                }
             }
         }
         catch (e_1_1) { e_1 = { error: e_1_1 }; }
@@ -133,12 +153,11 @@ var Config = /** @class */ (function () {
             }
             finally { if (e_1) throw e_1.error; }
         }
-        // FIXME: missing version here. make async?
     };
     Config.prototype.fromFile = function (filepath) {
         if (filepath === void 0) { filepath = this.path; }
         return __awaiter(this, void 0, void 0, function () {
-            var serializedConfig, e_2, lines, defaultConfig, config;
+            var serializedConfig, e_2, lines, updatedConfig;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -160,25 +179,12 @@ var Config = /** @class */ (function () {
                         return [3 /*break*/, 4];
                     case 4:
                         lines = serializedConfig.split('\n').filter(Boolean);
-                        defaultConfig = {
-                            APPID: '',
-                            UNITS: 'f',
-                            FORMAT: 'i l/hu ',
-                            DAYS: '1',
-                            CACHED_AT: '',
-                            CACHED_WEATHER: '',
-                            CACHE_INTERVAL_MINUTES: '10',
-                            VERSION: this.version,
-                        };
-                        config = lines.reduce(function (config, line) {
-                            // if a config line has multiple '=', you should throw an config Parsing error.
-                            // case: user uses '=' in their format string.
-                            // make them escape it? and split the line on [^\]= ?
+                        updatedConfig = lines.reduce(function (config, line) {
                             var _a = __read(line.split('='), 2), name = _a[0], value = _a[1];
-                            config[name.trim()] = value; // don't trim so user can adjust formatting space via config FORMAT val.
+                            config[name.trim()] = name.trim() === 'FORMAT' ? value : value.trim();
                             return config;
-                        }, defaultConfig);
-                        this._config = config;
+                        }, __assign({}, this._config));
+                        this._config = updatedConfig;
                         return [2 /*return*/];
                 }
             });

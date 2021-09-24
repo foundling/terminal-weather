@@ -30,6 +30,7 @@ export default class Config {
 
   path:string;
   version:string;
+  _defaults:IConfig;
   _config:IConfig;
   _rawConfig:string;
 
@@ -39,7 +40,6 @@ export default class Config {
     this.path = filepath;
     this.version = version;
     this._rawConfig = '';
-
     this._config = {
       APPID: '',
       UNITS: 'f',
@@ -49,7 +49,9 @@ export default class Config {
       CACHED_WEATHER: '',
       CACHE_INTERVAL_MINUTES: '10',
       VERSION: this.version,
-    }
+    };
+
+    this._defaults = Object.freeze({...this._config});
 
   }
 
@@ -85,6 +87,10 @@ export default class Config {
 
   }
 
+  get defaults() {
+    return  this._defaults;
+  }
+
   get(key: ConfigProp): string  {
     return this._config[key];
   }
@@ -95,9 +101,10 @@ export default class Config {
 
   fromObject(configValues: Partial<IConfig>):void {
     for (let [key, value] of Object.entries(configValues)) {
-      if (value) this.set(key, value);
+      if (value) {
+        this.set(key, value);
+      }
     }
-    // FIXME: missing version here. make async?
   }
 
   async fromFile(filepath: string = this.path):Promise<void> {
@@ -109,7 +116,7 @@ export default class Config {
       serializedConfig = await readFilePromise(filepath, 'utf8');
       this._rawConfig = serializedConfig;
 
-    } catch(e:any) { // FIXME
+    } catch(e:any) { // FIXME: any
 
       if (e.code === 'ENOENT') {
         log('No ~/.twconfig file found. see terminal-weather --help for usage.', 'Error');
@@ -118,32 +125,17 @@ export default class Config {
 
     }
 
-
     const lines = serializedConfig.split('\n').filter(Boolean);
-    const defaultConfig:IConfig = {
-      APPID: '',
-      UNITS: 'f',
-      FORMAT: 'i l/hu ', 
-      DAYS: '1',
-      CACHED_AT: '',
-      CACHED_WEATHER:'',
-      CACHE_INTERVAL_MINUTES: '10',
-      VERSION: this.version,
-    };
+    const updatedConfig:IConfig = lines.reduce((config:IConfig, line:string) => {
 
-    const config:IConfig = lines.reduce((config:IConfig, line:string) => {
-
-      // if a config line has multiple '=', you should throw an config Parsing error.
-      // case: user uses '=' in their format string.
-      // make them escape it? and split the line on [^\]= ?
       const [name, value] = line.split('=')
-      config[name.trim()] = value; // don't trim so user can adjust formatting space via config FORMAT val.
+      config[name.trim()] = name.trim() === 'FORMAT' ? value : value.trim(); 
 
       return config;
 
-    }, defaultConfig);
+    }, { ...this._config });
 
-    this._config = config;
+    this._config = updatedConfig;
 
   }
 
