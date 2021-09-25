@@ -25,7 +25,7 @@ A minimal and configurable command-line tool for displaying the weather in your 
 
 ## Caching and Module loading
 
-+ `terminal-weather` sets the default `CACHE_INTERVAL` to 10 minutes for regular use because this is the update frequency of Open Weather's API. The rest of the time, `terminal-weather` prints a cached value.  Unless you pass an `-n` or `--invalidate-cache` flag. This is especially useful if you want the weather in your terminal prompt. 
++ `terminal-weather` sets the default `CACHE_INTERVAL_MINUTES` to 10 minutes for regular use because this is the update frequency of Open Weather's API. The rest of the time, `terminal-weather` prints a cached value.  Unless you pass an `-n` or `--invalidate-cache` flag. This is especially useful if you want the weather in your terminal prompt. 
 
 + Speaking of weather in your terminal prompt, `terminal-weather` loads in a minimal and progressive way. Because the creator wants the weather in his terminal, but doesn't want a janky experience, there are `-p` and `--prompt` flags that circumvent the standard module loading procedure and fetched cached data. Only the modules required for that use-case are loaded.  In case of a cache expiration, the additional modules required to retreive new weather data are loaded. This provides a near-seamless terminal experience when embedding terminal-weather in your prompt (see below). 
 
@@ -60,8 +60,7 @@ A minimal and configurable command-line tool for displaying the weather in your 
       UNITS=f
       FORMAT=i
       DAYS=4
-      CACHED_AT=1632439018291
-      CACHED_WEATHER=🌥  🌧  🌞  🌥
+      CACHE_INTERVAL_MINUTES=10
       VERSION=1.0.0
 
 ````
