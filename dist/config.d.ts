@@ -15,11 +15,13 @@ declare type ValidationErrors = string[];
 export default class Config {
     path: string;
     version: string;
+    _defaults: IConfig;
     _config: IConfig;
     _rawConfig: string;
     constructor(filepath: string, version: string);
     validate(): ValidationErrors;
     _serialize(config?: IConfig): string;
+    get defaults(): IConfig;
     get(key: ConfigProp): string;
     set(key: ConfigProp, value: string): void;
     fromObject(configValues: Partial<IConfig>): void;

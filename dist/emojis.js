@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+// TODO: colorize text. rain=blue, snow=white
 var emojiMap = {
     Thunderstorm: {
         text: 'tstorm',

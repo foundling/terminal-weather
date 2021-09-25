@@ -41,8 +41,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var weather_1 = __importDefault(require("../weather"));
 var log_1 = __importDefault(require("../log"));
-var CACHE_EXPIRATION_MIN = 10;
-var DEBUG = 'TW_DEBUG' in process.env;
 function fetchWeather(options) {
     return __awaiter(this, void 0, void 0, function () {
         var config, _a, invalidateCache, _b, currentTimeMs, existingCache, cachedWeather, cacheInterval, appId, weatherString, msSinceEpochFromCached, deltaMinutes, cacheExpirationDuration, weatherString;
@@ -52,16 +50,13 @@ function fetchWeather(options) {
                     config = options.config, _a = options.invalidateCache, invalidateCache = _a === void 0 ? false : _a, _b = options.currentTimeMs, currentTimeMs = _b === void 0 ? new Date().getTime() : _b;
                     existingCache = config.get('CACHED_AT');
                     cachedWeather = config.get('CACHED_WEATHER');
-                    cacheInterval = config.get('CACHE_EXPIRATION_MIN');
+                    cacheInterval = config.get('CACHE_INTERVAL_MINUTES');
                     appId = config.get('APPID');
                     if (!appId) {
                         (0, log_1.default)("Missing APPID from your config. Please run 'terminal-weather configure'", 'Error');
                         process.exit(1);
                     }
                     if (!(invalidateCache || existingCache === '')) return [3 /*break*/, 3];
-                    if (DEBUG && invalidateCache) {
-                        console.log('invalidating cache');
-                    }
                     return [4 /*yield*/, (0, weather_1.default)(config)];
                 case 1:
                     weatherString = _c.sent();
@@ -74,8 +69,7 @@ function fetchWeather(options) {
                 case 3:
                     msSinceEpochFromCached = new Date(parseInt(existingCache)).getTime();
                     deltaMinutes = (currentTimeMs - msSinceEpochFromCached) / (1000 * 60);
-                    cacheExpirationDuration = cacheInterval && parseInt(cacheInterval) >= CACHE_EXPIRATION_MIN ?
-                        cacheInterval : CACHE_EXPIRATION_MIN;
+                    cacheExpirationDuration = Math.max(parseInt(cacheInterval || config.defaults.CACHE_INTERVAL_MINUTES), parseInt(config.defaults.CACHE_INTERVAL_MINUTES));
                     if (!(deltaMinutes > cacheExpirationDuration)) return [3 /*break*/, 6];
                     return [4 /*yield*/, (0, weather_1.default)(config)];
                 case 4:
@@ -86,7 +80,9 @@ function fetchWeather(options) {
                 case 5:
                     _c.sent();
                     return [2 /*return*/, weatherString];
-                case 6: return [2 /*return*/, cachedWeather];
+                case 6: 
+                // cache not expired
+                return [2 /*return*/, cachedWeather];
             }
         });
     });
