@@ -73,11 +73,9 @@ Note: I haven't had the time to find a good arg parsing library for typescript, 
 
 ### Getting `terminal-weather` into your terminal prompt
 
-If you want to include terminal-weather in your bash prompt, there are a couple things you need to do:
+If you want to include terminal-weather in your bash prompt, here is what you need to add to your ~/.bashrc:
 
-1. Add the following lines to your `~/.bashrc` file:
-
-        # a function to insert the terminal-weather bash fn inside the PS1 variable
+        # a function to insert the terminal-weather command into your PS1 variable
         set_bash_prompt() {
             PS1="$(terminal-weather -p)\u@[\h]$ $(history -n)"
         }
