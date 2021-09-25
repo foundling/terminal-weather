@@ -1,8 +1,7 @@
-# Terminal Weather
+# Terminal Weather 🌥 🌧 🌞 🌥
 
 A minimal and configurable command-line tool for displaying the weather in your location, optimized for re-rendering in your terminal prompt. If you hit enter a bunch of times in your terminal, if you have `terminal-weather` embedded in your prompt, you will get accurate weather with the occasional micro-delay or error message.
 
-🌥 🌧 🌞 🌥
 
 <img src="./assets/demo.svg">
 
