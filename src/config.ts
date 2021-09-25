@@ -43,7 +43,7 @@ export default class Config {
     this._config = {
       APPID: '',
       UNITS: 'f',
-      DAYS: '1',
+      DAYS: '4',
       FORMAT: 't ',
       CACHED_AT: '',
       CACHED_WEATHER: '',
