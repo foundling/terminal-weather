@@ -50,16 +50,19 @@ A minimal and configurable command-line tool for displaying the weather in your 
       w: weekday
       u: temp units
 
-    example format string: "i l/h u "
+    example format string: "i l/hu"
+    example output: 🌧  66/76°f
 
     Configuration:
 
-    Your configuration path is fixed at ~/.twconfig. It looks like this:
+    Your configuration path is fixed at ~/.twconfig. It could look like this:
 
-      APPID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+      APPID=[...]
       UNITS=f
       FORMAT=i
-      DAYS=4
+      DAYS=1
+      CACHED_WEATHER=🌧
+      CACHED_AT=1632541512508
       CACHE_INTERVAL_MINUTES=10
       VERSION=1.0.0
 
