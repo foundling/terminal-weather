@@ -86,7 +86,9 @@ If you want to include terminal-weather in your bash prompt, here is what you ne
         # include above fn in prompt command variable so the prompt is reset each time it is rendered
         PROMPT_COMMAND="set_bash_prompt; $PROMPT_COMMAND"
 
-## Tips
+## Notes / Tips
+
+`terminal-weather`'s performance degrades after sourcing your `~/.bashrc`.
 
 If you update your display, units and/or format string, the update will not be visible until the cache expires. To make the effects immediately visible, pass the `-n` flag to explicitly invalidate the cache at the same time. E.g.: 
 
