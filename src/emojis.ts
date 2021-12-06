@@ -23,7 +23,7 @@ const emojiMap:EmojiMap = {
   },
   Snow: { 
     text: 'snow',
-    icon: '❄'
+    icon: '❄️'
   },
   Mist: {
     text: 'mist',
