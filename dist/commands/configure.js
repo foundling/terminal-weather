@@ -58,7 +58,7 @@ function configure() {
         for (var _b = __values(Object.values(questions)), _c = _b.next(); !_c.done; _c = _b.next()) {
             var q = _c.value;
             // TODO: break the parts up, then format them.  don't show default stuff if there is none.
-            var formatted = chalk_1.default.underline.white(q.text) + " " + (q.note ? '[ ' + q.note + ' ]' : '') + " (" + chalk_1.default.blue('default') + ": " + (q.default || 'N/A') + "): ";
+            var formatted = "".concat(chalk_1.default.underline.white(q.text), " ").concat(q.note ? '[ ' + q.note + ' ]' : '', " (").concat(chalk_1.default.blue('default'), ": ").concat(q.default || 'N/A', "): ");
             var answer = readline_sync_1.default.question(formatted).trim() || q.default;
             configValues[q.field] = answer;
         }

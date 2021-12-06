@@ -12,7 +12,7 @@ var colorFns = {
 function log(message, logLevel) {
     if (logLevel === void 0) { logLevel = 'Info'; }
     var colorFn = colorFns[logLevel];
-    var colorizedErrorLevel = colorFn("[" + logLevel + "]");
-    console.log(colorizedErrorLevel + " " + message);
+    var colorizedErrorLevel = colorFn("[".concat(logLevel, "]"));
+    console.log("".concat(colorizedErrorLevel, " ").concat(message));
 }
 exports.default = log;

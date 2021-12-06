@@ -16,7 +16,7 @@ var emojiMap = {
     },
     Snow: {
         text: 'snow',
-        icon: '❄'
+        icon: '❄️'
     },
     Mist: {
         text: 'mist',

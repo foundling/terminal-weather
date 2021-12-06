@@ -109,10 +109,10 @@ var Config = /** @class */ (function () {
             errors.push("Config file ~/.twconfig Invalid: Each line should have NAME=VALUE format.  Found more than one '=' on a single line.");
         }
         if (!isNaN(days) && days < 1 || days > 8) {
-            errors.push("Config value 'DAYS' must be a number between 1 and 8, inclusive. Got " + days + ".");
+            errors.push("Config value 'DAYS' must be a number between 1 and 8, inclusive. Got ".concat(days, "."));
         }
         if (!['f', 'c', 'k'].includes(units.trim().toLowerCase())) {
-            errors.push("Config value 'UNITS' must be 'f', 'c' or 'k'. Got " + units + ".");
+            errors.push("Config value 'UNITS' must be 'f', 'c' or 'k'. Got ".concat(units, "."));
         }
         return errors;
     };
@@ -120,7 +120,7 @@ var Config = /** @class */ (function () {
         if (config === void 0) { config = this._config; }
         return Object.entries(config).reduce(function (prev, cur) {
             var _a = __read(cur, 2), key = _a[0], value = _a[1];
-            return prev += key + "=" + value + "\n";
+            return prev += "".concat(key, "=").concat(value, "\n");
         }, '');
     };
     Object.defineProperty(Config.prototype, "defaults", {

@@ -74,7 +74,7 @@ var OWM_API_BASE = 'https://api.openweathermap.org/data/2.5/onecall';
 function buildSearchParamString(options) {
     return Object.entries(options).reduce(function (qs, entry) {
         var _a = __read(entry, 2), key = _a[0], value = _a[1];
-        var segment = "&" + key + "=" + value;
+        var segment = "&".concat(key, "=").concat(value);
         return qs + segment;
     }, '');
 }
@@ -98,7 +98,7 @@ function getLocationFromIpAddress() {
                     return [3 /*break*/, 4];
                 case 3:
                     e_1 = _b.sent();
-                    (0, log_1.default)("" + e_1, 'Error');
+                    (0, log_1.default)("".concat(e_1), 'Error');
                     process.exit(1);
                     return [3 /*break*/, 4];
                 case 4: return [4 /*yield*/, result.json()];
@@ -116,7 +116,7 @@ function getWeatherFromCoords(queryParams) {
             switch (_a.label) {
                 case 0:
                     qp = buildSearchParamString(queryParams);
-                    weatherEndpoint = OWM_API_BASE + "?" + qp;
+                    weatherEndpoint = "".concat(OWM_API_BASE, "?").concat(qp);
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
@@ -130,7 +130,7 @@ function getWeatherFromCoords(queryParams) {
                     return [3 /*break*/, 4];
                 case 3:
                     e_2 = _a.sent();
-                    (0, log_1.default)("" + e_2, 'Error');
+                    (0, log_1.default)("".concat(e_2), 'Error');
                     process.exit(1);
                     return [3 /*break*/, 4];
                 case 4: return [4 /*yield*/, response.json()];
@@ -154,12 +154,12 @@ var makeWeatherFormatter = function (_a) {
         var howShort = ['S', 'T'].includes(weekday[0]) ? 2 : 1;
         var weekdayShort = weekday.substr(0, howShort);
         var valueMap = {
-            'i': icon + " ",
+            'i': "".concat(icon, " "),
             't': text || '',
-            'l': "" + lo,
-            'h': "" + hi,
+            'l': "".concat(lo),
+            'h': "".concat(hi),
             'w': weekdayShort,
-            'u': "\u00B0" + units,
+            'u': "\u00B0".concat(units),
         };
         var formattedString = '';
         try {
