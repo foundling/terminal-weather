@@ -131,7 +131,7 @@ const makeWeatherFormatter = ({ formatString, units, emojiMap }:FormatData) => (
 
   let valueMap:FormatMap = {
     'i': `${icon} `,
-    't': text || '',
+    't': `${text} ` || '',
     'l': `${lo}`, 
     'h': `${hi}`,
     'w': weekdayShort,
@@ -141,7 +141,7 @@ const makeWeatherFormatter = ({ formatString, units, emojiMap }:FormatData) => (
   let formattedString = '';
 
   for (let c of formatString) {
-    formattedString += (c in valueMap ? valueMap[c] : c);
+    formattedString += (c in valueMap ? valueMap[c] : c) + '';
   }
   
   return formattedString;
