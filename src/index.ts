@@ -1,7 +1,7 @@
 const { readFile } = require('fs');
 const { homedir } = require('os');
 const path = require('path');
-const terminalWeather  = require('./run').default;
+const { default: terminalWeather } = require('./run');
 
 const ARGV = process.argv.slice(2);
 const CONFIG_FILE = homedir() + '/.twconfig';
@@ -11,31 +11,11 @@ const PROMPT_MODE = inPromptMode(ARGV);
 const VERSION = require('../package.json').version;
 const CONFIG_PATH = path.join(homedir(),'.twconfig');
 
+export default function tryCacheThenRun() {
 
-interface Error {
-    stack?: string;
-}
-
-function inPromptMode(args: string[]) {
-
-  const allowed = [ '-p', '--prompt' ];
-  return args.length > 0 && args.every(arg => allowed.includes(arg));
-
-}
-
-function _run(terminalWeather:any) {
-  // regular cli invocation
-  terminalWeather(ARGV, VERSION, CONFIG_PATH).then((weatherString: string) => {
-    const lineEnding = PROMPT_MODE ? '' : '\n';
-    process.stdout.write(`${weatherString}${lineEnding}`);
-  }).catch((e: Error) => { console.error(e); });
-}
-
-function tryCacheThenRun() {
-
-  // not in prompt mode, run in regular mode.
+  // no -p flag passed, run in regular mode.
   if (!PROMPT_MODE) {
-    return _run(terminalWeather);
+    return runCli(terminalWeather);
   }
 
   // if in prompt mode: emit weather string as efficiently as possible.
@@ -87,11 +67,24 @@ function tryCacheThenRun() {
       process.stdout.write(PROMPT_MODE ? cachedWeather : cachedWeather + '\n');
     } else {
       // cache expired, run in regular cli mode.
-      return _run(terminalWeather);
+      return runCli(terminalWeather);
     }
 
   });
 
 }
 
-tryCacheThenRun();
+function runCli(terminalWeather:any) {
+  terminalWeather(ARGV, VERSION, CONFIG_PATH).then((weatherString: string) => {
+    const lineEnding = PROMPT_MODE ? '' : '\n';
+    process.stdout.write(`${weatherString}${lineEnding}`);
+  }).catch((e: Error) => { console.error(e); });
+}
+
+
+function inPromptMode(args: string[]) {
+
+  const allowed = [ '-p', '--prompt' ];
+  return args.length > 0 && args.every(arg => allowed.includes(arg));
+
+}

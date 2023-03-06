@@ -1,3 +1,4 @@
 #!/usr/bin/env node
 
-require('../dist/index.js');
+const { default:tw } = require('../dist/index.js');
+tw();
