@@ -155,7 +155,7 @@ var makeWeatherFormatter = function (_a) {
         var weekdayShort = weekday.substr(0, howShort);
         var valueMap = {
             'i': "".concat(icon, " "),
-            't': text || '',
+            't': "".concat(text, " ") || '',
             'l': "".concat(lo),
             'h': "".concat(hi),
             'w': weekdayShort,
@@ -165,7 +165,7 @@ var makeWeatherFormatter = function (_a) {
         try {
             for (var formatString_1 = __values(formatString), formatString_1_1 = formatString_1.next(); !formatString_1_1.done; formatString_1_1 = formatString_1.next()) {
                 var c = formatString_1_1.value;
-                formattedString += (c in valueMap ? valueMap[c] : c);
+                formattedString += (c in valueMap ? valueMap[c] : c) + '';
             }
         }
         catch (e_3_1) { e_3 = { error: e_3_1 }; }
