@@ -2,12 +2,12 @@ export default function help() {
   const msg = `
     usage: terminal-weather [ option | command ]
 
-    tw                           gets weather, maybe from cache, maybe from owm
-    tw -n, --invalidate-cache    invalidates cache, gets weather
-    tw -p, --prompt              gets weather, prints w/ no newline
-    tw --help, -h                prints help
-    tw info                      prints config values
-    tw configure                 configure tw 
+    terminal-weather                           gets weather, maybe from cache, maybe from owm
+    terminal-weather -n, --invalidate-cache    invalidates cache, gets weather
+    terminal-weather -p, --prompt              gets weather, prints w/ no newline
+    terminal-weather --help, -h                prints help
+    terminal-weather info                      prints config values
+    terminal-weather configure                 configure tw
 
     format values:
       i: icon
@@ -21,7 +21,7 @@ export default function help() {
 
     Configuration:
 
-    Your configuration path is fixed at ~/.twconfig. It looks like this:
+    Your configuration file can be found at ~/.twconfig. It looks like this:
 
       APPID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
       UNITS=f
