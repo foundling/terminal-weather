@@ -1,20 +1,18 @@
 # Terminal Weather 🌥 🌧 🌞 ❄️
 
-A minimal and configurable command-line tool for displaying the weather in your location, optimized for re-rendering in your terminal prompt. If you hit enter a bunch of times in your terminal, if you have `terminal-weather` embedded in your prompt, you will get accurate weather with the occasional micro-delay or error message.
-
+A Node.js CLI for embedding the weather in your terminal prompt.
 
 <img src="./assets/demo.svg">
-
 
 ## Requirements
 
 + An [openweathermap.org](http://openweathermap.org) API key. You can generate one [here](https://home.openweathermap.org/api_keys), but you will need to register with OpenWeather first.
-+ Node 8 and up
++ Node 8+
 
 ## Installation
 
 + Run `npm install -g terminal-weather`
-+ Run `terminal-weather configure` to set it up. You will be prompted for your open weathermap.org API key as well the default temperature unit.
++ Run `terminal-weather configure` prompts you for an open weathermap.org API and a temperature unit.
 
 ## Which Services It Uses
 
@@ -23,24 +21,25 @@ A minimal and configurable command-line tool for displaying the weather in your 
 + [ip-api.com](http://ip-api.com) to map your ip to a location.
 + [openweathermap.org](http://openweathermap.org) to retrieve the current weather for your location.
 
-## Caching and Module loading
+## Caching Behavior
 
-+ `terminal-weather` sets the default `CACHE_INTERVAL_MINUTES` to 10 minutes for regular use because this is the update frequency of Open Weather's API. The rest of the time, `terminal-weather` prints a cached value.  Unless you pass an `-n` or `--invalidate-cache` flag. This is especially useful if you want the weather in your terminal prompt. 
+ `terminal-weather` sets the default `CACHE_INTERVAL_MINUTES` to 10 minutes for regular use because this is the update frequency of Open Weather's API. The rest of the time, `terminal-weather` prints a cached value.  Unless you pass an `-n` or `--invalidate-cache` flag. This is especially useful if you want the weather in your terminal prompt. 
 
-+ Speaking of weather in your terminal prompt, `terminal-weather` loads in a minimal and progressive way. Because the creator wants the weather in his terminal, but doesn't want a janky experience, there are `-p` and `--prompt` flags that circumvent the standard module loading procedure and fetched cached data. Only the modules required for that use-case are loaded.  In case of a cache expiration, the additional modules required to retreive new weather data are loaded. This provides a near-seamless terminal experience when embedding terminal-weather in your prompt (see below). 
 
 ## Usage
 
 ````bash
 
+$ terminal-weather -h
+
     usage: terminal-weather [ option | command ]
 
-    tw                           gets weather, maybe from cache, maybe from owm
-    tw -n, --invalidate-cache    invalidates cache, gets weather
-    tw -p, --prompt              gets weather, prints w/ no newline
-    tw --help, -h                prints help
-    tw info                      prints config values
-    tw configure                 configure tw
+    terminal-weather                           gets weather, maybe from cache, maybe from owm
+    terminal-weather -n, --invalidate-cache    invalidates cache, gets weather
+    terminal-weather -p, --prompt              gets weather, prints w/ no newline
+    terminal-weather --help, -h                prints help
+    terminal-weather info                      prints config values
+    terminal-weather configure                 configure tw
 
     format values:
       i: icon
@@ -50,25 +49,20 @@ A minimal and configurable command-line tool for displaying the weather in your 
       w: weekday
       u: temp units
 
-    example format string: "i l/hu"
-    example output: 🌧  66/76°f
+    example format string: "i l/h u "
 
     Configuration:
 
-    Your configuration path is fixed at ~/.twconfig. It could look like this:
+    Your configuration file can be found at ~/.twconfig. It looks like this:
 
-      APPID=[...]
+      APPID=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
       UNITS=f
       FORMAT=i
-      DAYS=1
-      CACHED_WEATHER=🌧
-      CACHED_AT=1632541512508
+      DAYS=4
       CACHE_INTERVAL_MINUTES=10
       VERSION=1.0.0
 
 ````
-
-Note: I haven't had the time to find a good arg parsing library for typescript, so currently the argument parsing isn't great.  For now, pass one argument or option at a time :(
 
 ## Configuration
 
@@ -88,7 +82,7 @@ If you want to include terminal-weather in your bash prompt, here is what you ne
 
 ## Notes / Tips
 
-`terminal-weather`'s performance degrades after sourcing your `~/.bashrc`.
+### Getting the Latest Weather
 
 If you update your display, units and/or format string, the update will not be visible until the cache expires. To make the effects immediately visible, pass the `-n` flag to explicitly invalidate the cache at the same time. E.g.: 
 
