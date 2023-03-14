@@ -2,29 +2,18 @@
 
 A Node.js CLI for embedding the weather in your terminal prompt.
 
-<img src="./assets/demo.svg">
-
 ## Requirements
 
 + An [openweathermap.org](http://openweathermap.org) API key. You can generate one [here](https://home.openweathermap.org/api_keys), but you will need to register with OpenWeather first.
-+ Node 8+
 
 ## Installation
 
 + Run `npm install -g terminal-weather`
 + Run `terminal-weather configure` prompts you for an open weathermap.org API and a temperature unit.
 
-## Which Services It Uses
+## Configuration
 
-`Terminal-weather` uses the following APIs:
-
-+ [ip-api.com](http://ip-api.com) to map your ip to a location.
-+ [openweathermap.org](http://openweathermap.org) to retrieve the current weather for your location.
-
-## Caching Behavior
-
- `terminal-weather` sets the default `CACHE_INTERVAL_MINUTES` to 10 minutes for regular use because this is the update frequency of Open Weather's API. The rest of the time, `terminal-weather` prints a cached value.  Unless you pass an `-n` or `--invalidate-cache` flag. This is especially useful if you want the weather in your terminal prompt. 
-
++ Run `terminal-weather configure` to connect your API key, set the temperature unit and display formatting.
 
 ## Usage
 
@@ -64,10 +53,6 @@ $ terminal-weather -h
 
 ````
 
-## Configuration
-
-+ Run `terminal-weather configure` and give `terminal-weather` the values it needs to store so it can continually query the api.
-
 ### Getting `terminal-weather` into your terminal prompt
 
 If you want to include terminal-weather in your bash prompt, here is what you need to add to your ~/.bashrc:
@@ -80,9 +65,16 @@ If you want to include terminal-weather in your bash prompt, here is what you ne
         # include above fn in prompt command variable so the prompt is reset each time it is rendered
         PROMPT_COMMAND="set_bash_prompt; $PROMPT_COMMAND"
 
-## Notes / Tips
+## 3rd Party Services
 
-### Getting the Latest Weather
+`Terminal-weather` uses the following APIs:
+
++ [ip-api.com](http://ip-api.com) to map your ip to a location.
++ [openweathermap.org](http://openweathermap.org) to retrieve the current weather for your location.
+
+## Caching Behavior
+
+ `terminal-weather` sets the default `CACHE_INTERVAL_MINUTES` to 10 minutes for regular use because this is the update frequency of Open Weather's API. The rest of the time, `terminal-weather` prints a cached value. This is especially useful if you want the weather in your terminal prompt. 
 
 If you update your display, units and/or format string, the update will not be visible until the cache expires. To make the effects immediately visible, pass the `-n` flag to explicitly invalidate the cache at the same time. E.g.: 
 
