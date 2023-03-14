@@ -11,9 +11,6 @@ const PROMPT_MODE = inPromptMode(ARGV);
 const VERSION = require('../package.json').version;
 const CONFIG_PATH = path.join(homedir(),'.twconfig');
 
-//TODO: this was in regular js before.  improve types, convert
-// promises to async.
-
 export default function tryCacheThenRun() {
 
   // no -p flag passed, run in regular mode.
